@@ -2,20 +2,22 @@ from dash import Dash, html, dcc, ctx, ALL,no_update
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from statsbombpy import sb
-import random
 import pandas as pd
-import numpy as np
-import utils
-import time
+from datetime import datetime
+import os
+import glob
 
+import utils
 
 
 # Global var
+MUSIC21 = True
 df_comp = sb.competitions().sort_values(by=['competition_id', 'season_id'])
 DEFAULT_GENDER = 'male'
 DEFAULT_COMP = 'FIFA World Cup'
 DEFAULT_YEAR = '2018'
 DEFAULT_MATCH = 'France-Argentina'
+DEFAULT_MAIN = "Choir"
 
 DRUM_INSTRUMENTS = ['Agogo', 'BassDrum', 'BongoDrums', 'Castanets', 'ChurchBells', 'CongaDrum', 'Cowbell', 'CrashCymbals', 'Cymbals', 'Dulcimer', 'FingerCymbals', 'Glockenspiel', 'Gong', 'Handbells', 'HiHatCymbal', 'Kalimba', 'Maracas', 'Marimba', 'PitchedPercussion', 'Ratchet', 'RideCymbals', 'SandpaperBlocks', 'Siren', 'SizzleCymbal', 'SleighBells', 'SnareDrum', 'SplashCymbals', 'SteelDrum', 'SuspendedCymbal', 'Taiko', 'TamTam', 'Tambourine', 'TempleBlock', 'TenorDrum', 'Timbales', 'Timpani', 'TomTom', 'Triangle', 'TubularBells', 'UnpitchedPercussion', 'Vibraphone', 'Vibraslap', 'Whip', 'WindMachine', 'Woodblock', 'Xylophone']
 MAIN_INSTRUMENTS = ['Accordion', 'AcousticBass', 'AcousticGuitar', 'Alto', 'AltoSaxophone', 'Bagpipes', 'Banjo', 'Baritone', 'BaritoneSaxophone', 'Bass', 'BassClarinet', 'BassTrombone', 'Bassoon', 'BrassInstrument', 'Celesta', 'Choir', 'Clarinet', 'Clavichord', 'Conductor', 'Contrabass', 'Contrabassoon', 'ElectricBass', 'ElectricGuitar', 'ElectricOrgan', 'ElectricPiano', 'EnglishHorn', 'Flute', 'FretlessBass', 'Guitar', 'Harmonica', 'Harp', 'Harpsichord', 'Horn', 'KeyboardInstrument', 'Koto', 'Lute', 'Mandolin', 'MezzoSoprano', 'Oboe', 'Ocarina', 'Organ', 'PanFlute', 'Percussion', 'Piano', 'Piccolo', 'PipeOrgan', 'Recorder', 'ReedOrgan', 'Sampler', 'Saxophone', 'Shakuhachi', 'Shamisen', 'Shehnai', 'Sitar', 'Soprano', 'SopranoSaxophone', 'StringInstrument', 'Tenor', 'TenorSaxophone', 'Trombone', 'Trumpet', 'Tuba', 'Ukulele', 'Viola', 'Violin', 'Violoncello', 'Vocalist', 'Whistle', 'WoodwindInstrument']
@@ -36,7 +38,7 @@ card_dropdowns = dbc.Card(
                 dcc.Dropdown(
                     className='dropdown',
                     id='dd-comp', clearable=False,
-                    # options=utils.get_comp_names(df_comp, DEFAULT_GENDER),
+                    options=utils.get_comp_names(df_comp, DEFAULT_GENDER),
                     value=DEFAULT_COMP,
                     persistence=True
                 ),
@@ -45,7 +47,7 @@ card_dropdowns = dbc.Card(
                 dcc.Dropdown(
                     className='dropdown',
                     id='dd-year', clearable=False,
-                    # options=utils.get_comp_years(df_comp,DEFAULT_GENDER,DEFAULT_COMP),
+                    options=utils.get_comp_years(df_comp,DEFAULT_GENDER,DEFAULT_COMP),
                     value=DEFAULT_YEAR,
                     persistence=True
                 )
@@ -54,6 +56,7 @@ card_dropdowns = dbc.Card(
                 dcc.Dropdown(
                     className='dropdown',
                     id='dd-match', clearable=False,
+                    options=utils.get_matches_list(df_comp,DEFAULT_GENDER,DEFAULT_COMP,DEFAULT_YEAR),
                     value=DEFAULT_MATCH,
                     persistence=True
                 )
@@ -72,15 +75,17 @@ card_players_to_notes = dbc.Card(
 card_choose_instruments = dbc.Card(
     dbc.CardBody([
         html.Div([
+            html.Label("Ball possession"),
             dcc.Dropdown(
                 className='dropdown',
                 id='dd-main-instrument', clearable=False,
-                value='Ukulele',
+                value=DEFAULT_MAIN,
                 options = MAIN_INSTRUMENTS,
                 persistence=True
             )
-        ], className='div-dropdown'),
+        ]),
         html.Div([
+            html.Label("Events"),
             dcc.Dropdown(
                 className='dropdown',
                 id='dd-drum-instrument', clearable=False,
@@ -88,22 +93,26 @@ card_choose_instruments = dbc.Card(
                 options = DRUM_INSTRUMENTS,
                 persistence=True
             )
-        ], className='div-dropdown')
+        ])
     ]),
 )
 
 card_play = dbc.Card(
     dbc.CardBody([
-        dbc.Button('Generate song', id='btn-play', n_clicks=0),
+        dbc.Button('Generate song', id='btn-generate', n_clicks=0),
+        dcc.Loading(id="song-loading",
+                    children=[html.Div(id="song-loading-output")], type="default"),
+        dbc.Button('Load song', id='btn-load', n_clicks=0),
         html.Div(id='div-play'),
+        dbc.Button('Play with MusicalBeeps', id='btn-play', n_clicks=0),
+        html.Div(id='div-play-mb'),
     ]),
 )
+
 
 # Build App
 app = Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 # Read the click count data from the file
-with open('assets/click_count.txt', 'r') as f:
-    click_count = int(f.read())
 server = app.server
 # app.css.config.serve_locally = True
 # app.scripts.config.serve_locally = True
@@ -111,7 +120,7 @@ app.layout = dbc.Container([
         dcc.Store(id='store-notes'),
         dcc.Store(id='store-matches'),
         dcc.Store(id='store-events'),
-        dcc.Store(id='store-click-count', data=click_count),
+        dcc.Store(id='store-timestr'),
         dcc.Location(id='url', refresh=True),
         dbc.Row(dbc.Col(html.H1("Football Symphony"),id='title-row',className='text-center')),
         dbc.Row([
@@ -127,43 +136,61 @@ app.layout = dbc.Container([
             ]),
         ], id='row-main'),
 
-    ],fluid=True)
+    ],fluid=False)
 
 
+@app.callback(Output("progress", "value"), [Input("interval", "n_intervals")])
+def advance_progress(n):
+    return min(n % 110, 100)
 
-# Play music
+# Generate music
 @app.callback(
-    Output('div-play', 'children'),
-    Input("btn-play", "n_clicks"),
+    Output('store-timestr', 'data'),
+    Output('song-loading-output', 'children'),
+    Input("btn-generate", "n_clicks"),
     State("store-events", "data"),
     State("store-notes","data"),
     State("dd-main-instrument","value"),
     State("dd-drum-instrument","value"),
-    State('store-click-count','data'),
+    prevent_initial_call=True
 )
-def play_music(n_clicks,events,dnotes,main_instrument,drum_instrument,click_count,music21=True):
-    df_events = pd.DataFrame(events)
+def generate_music(n_clicks,events,dnotes,main_instrument,drum_instrument,music21=MUSIC21):
     if n_clicks>0:
-        if n_clicks is not None:
-            click_count = click_count + 1
-        with open('assets/click_count.txt', 'w') as f:
-            f.write(str(click_count))
-        if music21:
-            # delete previous file in assets
-            # for filename in glob.glob("assets/tmp-wav*"):
-            #     os.remove(filename)
-            utils.generate_music21(df_events,dnotes,main_instrument,drum_instrument,
-                                   click_count,
-                                   # soundfont= 'assets/soundfont/GeneralUser GS v1.471.sf2')
-                                   soundfont='assets/soundfont/ChateauGrand.sf2')
-            return utils.get_player(str(click_count)),str(click_count)
-        else:
-            utils.play_beeps(df_events,dnotes)
-            return "Sound on!",str(click_count)
-    else:
-        return utils.get_player(str(click_count)),str(click_count)
+        df_events = pd.DataFrame(events)
+        # delete previous file in assets
+        for filename in glob.glob("assets/tmp-wav*"):
+            os.remove(filename)
+        timestr = datetime.now().strftime("%d%m%y_%H%M%S")
+        utils.generate_music21(df_events,dnotes,main_instrument,drum_instrument,
+                               timestr,
+                               soundfont= 'assets/soundfont/GeneralUser.sf2')
+                               # soundfont='assets/soundfont/ChateauGrand.sf2')
+        return timestr, 'Music generated!'
 
 
+# Load music
+@app.callback(
+    Output('div-play', 'children'),
+    Input("btn-load", "n_clicks"),
+    State("store-timestr", "data"),
+    prevent_initial_call=True
+)
+def load_music(n_clicks,timestr):
+    return utils.get_player(timestr)
+
+
+# Play music
+@app.callback(
+    Output('div-play-mb', 'children'),
+    Input("btn-play", "n_clicks"),
+    State("store-events", "data"),
+    State("store-notes","data"),
+    prevent_initial_call=True
+)
+def play_music(n_clicks,events,dnotes):
+    if n_clicks>0:
+        df_events = pd.DataFrame(events)
+        utils.play_beeps(df_events,dnotes)
 
 
 # Callback to display players
@@ -172,12 +199,12 @@ def play_music(n_clicks,events,dnotes,main_instrument,drum_instrument,click_coun
      Output('store-notes','data'),
     [Input("store-events", "data"),
      Input("btn-shuffle", "n_clicks")
-     ]
+     ],
 )
 def update_players_and_notes(events,n_clicks):
     df_events = pd.DataFrame(events)
     players = list(df_events['player'].value_counts().index)
-    dnotes = utils.sample_notes(players,music21=True)
+    dnotes = utils.sample_notes(players,music21=MUSIC21)
     layout = html.Table([
         html.Thead([html.Tr([html.Th('Player'),html.Th('Note')])]),
         html.Tbody([html.Tr([html.Td(player),html.Td(note)]) for player,note in dnotes.items()])])
@@ -188,7 +215,8 @@ def update_players_and_notes(events,n_clicks):
 @app.callback(
     Output('dd-comp', 'options'),
     Output('dd-comp', 'value'),
-    [Input("dd-gender", "value")]
+    [Input("dd-gender", "value")],
+    prevent_initial_call=True
 )
 def update_comp_options(gender):
     options = utils.get_comp_names(df_comp,gender)
@@ -198,7 +226,8 @@ def update_comp_options(gender):
     Output('dd-year', 'options'),
     Output('dd-year', 'value'),
     [Input("dd-gender", "value"),
-     Input("dd-comp", "value")]
+     Input("dd-comp", "value")],
+    prevent_initial_call=True
 )
 def update_comp_options(gender,comp_name):
     options = utils.get_comp_years(df_comp,gender,comp_name)
@@ -210,7 +239,8 @@ def update_comp_options(gender,comp_name):
     Output('store-matches', 'data'),
     [Input("dd-gender", "value"),
      Input("dd-comp", "value"),
-     Input("dd-year", "value")]
+     Input("dd-year", "value")],
+    prevent_initial_call=True
 )
 def update_matches_options(gender,comp_name,year):
     df_matches = utils.get_matches(df_comp,gender,comp_name,year)
@@ -222,7 +252,7 @@ def update_matches_options(gender,comp_name,year):
     [Input("dd-gender", "value"),
      Input("dd-comp", "value"),
      Input("dd-year", "value"),
-     Input('dd-match', 'value')]
+     Input('dd-match', 'value')],
 )
 def store_events(gender,comp_name,year,match):
     df_events = utils.get_data(df_comp,gender, comp_name, year, match)
@@ -235,5 +265,5 @@ def store_events(gender,comp_name,year,match):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    app.run_server(debug=True,port=8000) #,dev_tools_hot_reload = False)
+    app.run_server(debug=True,port=8000,dev_tools_hot_reload = False)
     # run_server()

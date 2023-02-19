@@ -4,14 +4,12 @@ import pandas as pd
 import numpy as np
 import random
 from music21 import *
-from music21 import stream, instrument
+from music21 import stream, instrument, tempo
 from music21.note import Note,Rest
 import musicalbeeps
-from tqdm import tqdm
-from midi2audio_local import FluidSynth
-# import dash_player
+from midi2audio import FluidSynth
 from dash import html
-import inspect
+
 
 snare_drum_pitch = 38
 crash_cymbal_pitch = 49
@@ -28,6 +26,7 @@ def make_shot(part,duration):
     return part
 def make_pass(part,duration):
     part.append(Note(closed_high_hat_pitch, quarterLength=duration))
+    # part.append(Note(snare_drum_pitch, quarterLength=duration))
     return part
 def make_foul(part,duration):
     part.append(Note(long_whistle_pitch, quarterLength=duration))
@@ -35,7 +34,10 @@ def make_foul(part,duration):
 
 # define stream
 def make_stream(df_events,dnotes,main_instrument,drum_instrument):
+    df_events = df_events.sort_values(by=['minute','second'])
     s = stream.Score(id='mainScore')
+
+    stime = 0
 
     drumPart = stream.Part(id='drum')
     drum_instrument_class = eval('instrument.%s()' % drum_instrument)
@@ -49,12 +51,15 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
     main_instrument_class = eval('instrument.%s()'% main_instrument)
     mainPart.insert(0, main_instrument_class)
 
-    for idx, row in tqdm(df_events[~df_events['player'].isna()].iterrows()):
+    for idx, row in df_events[~df_events['player'].isna()].iterrows():
         fplayer = row['player']
         etype = row['type']
         # MAIN PART
         note = dnotes[fplayer]
-        duration = 0 if np.isnan(row['duration']) else row['duration']/8
+        duration = 0.1 if (np.isnan(row['duration']) or row['duration']==0) else row['duration']
+        duration = duration/5
+        # print(etype,"Duration",duration,"time",row['minute'],row['second'])
+        stime += duration
         n = Note(note, quarterLength=duration)
         mainPart.append(n)
         # DRUM PART
@@ -70,6 +75,7 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
         if etype == 'Shot':
             if row['shot_outcome'] == 'Goal':
                 goalPart = make_goal(goalPart,duration)
+                # print("GOAL at %s"%stime)
             else:
                 goalPart.append(Rest(quarterLength=duration))
         else:
@@ -78,6 +84,9 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
     s.insert(0, mainPart)
     s.insert(0, drumPart)
     s.insert(0, goalPart)
+    mm = tempo.MetronomeMark(number=120)
+    s.append(mm)
+    # print("Stream duration", stime)
     return s
 
 # Play music 21 stream
@@ -88,13 +97,7 @@ def generate_music21(df_events,dnotes,main_instrument,drum_instrument,timestr,so
     fs.midi_to_audio('assets/tmp.mid', 'assets/tmp-wav-%s.wav'%timestr)
 
 def get_player(timestr):
-    # player = dash_player.DashPlayer(
-    #     id="player",
-    #     url="assets/tmp-wav.wav",
-    #     controls=True,
-    #     width="50%",
-    #     height="100px"
-    # )
+    # print(os.path.isfile("assets/tmp-wav-%s.wav"%timestr))
     player = html.Audio(id="player",src="assets/tmp-wav-%s.wav"%timestr,controls=True)
     return player
 
@@ -114,20 +117,22 @@ def sample_notes(players,music21 = True):
     notes = ['A','B','C','D','E','F','G']
     octaves = range(3,6)
     sharp = ['','#','-'] if music21 else ['','#','b']
+    full_notes = []
+    for note in notes:
+        for octave in octaves:
+            for sh in sharp:
+                if music21:
+                    full_notes.append(note + sh + str(octave))
+                else:
+                    full_notes.append(note + str(octave) + sh)
+
     # totally random allocation
-    players_notes = random.choices(notes, k=len(players))
-    players_octaves = random.choices(octaves, k=len(players))
-    players_sharps = random.choices(sharp, k=len(players))
+    players_notes = random.sample(full_notes, k=len(players))
 
     df_ptn = pd.DataFrame({'player': players,
-                           'base_note': players_notes,
-                           'sharp': players_sharps,
-                           'octave': players_octaves,
+                           'note': players_notes
                            })
-    if music21:
-        df_ptn['note'] = df_ptn['base_note'] + df_ptn['sharp'] + df_ptn['octave'].astype(str)
-    else:
-        df_ptn['note'] = df_ptn['base_note'] + df_ptn['octave'].astype(str) + df_ptn['sharp']
+
     dnotes = df_ptn[['player','note']].set_index('player').to_dict()['note']
     return dnotes
 
@@ -142,6 +147,10 @@ def get_comp_names(df,gender):
 
 def get_comp_years(df,gender,comp_name):
     return list(df[(df['competition_gender'] == gender) & (df['competition_name'] == comp_name)]['season_name'])
+
+def get_matches_list(df,gender,comp_name,year):
+    df_matches = get_matches(df,gender,comp_name,year)
+    return list(df_matches['match_name'])
 
 def get_matches(df,gender,comp_name,year):
     comp_id, szn_id = get_comp_and_szn_id(df,gender,comp_name,year)
