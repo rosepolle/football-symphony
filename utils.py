@@ -6,7 +6,7 @@ import random
 from music21 import *
 from music21 import stream, instrument, tempo
 from music21.note import Note,Rest
-import musicalbeeps
+# import musicalbeeps
 from midi2audio import FluidSynth
 from dash import html
 
@@ -103,14 +103,14 @@ def get_player(timestr):
 
 
 # Play musicalBeep
-def play_beeps(df_events,dnotes):
-    player = musicalbeeps.Player(volume=0.3, mute_output=False)
-    for idx,row in df_events[~df_events['player'].isna()].iterrows():
-        fplayer = row['player']
-        note = dnotes[fplayer]
-        duration = 0.1 if (np.isnan(row['duration']) or row['duration']==0) else row['duration']/10
-        print("---", fplayer,'---',row['type'])
-        player.play_note(note, duration)
+# def play_beeps(df_events,dnotes):
+#     player = musicalbeeps.Player(volume=0.3, mute_output=False)
+#     for idx,row in df_events[~df_events['player'].isna()].iterrows():
+#         fplayer = row['player']
+#         note = dnotes[fplayer]
+#         duration = 0.1 if (np.isnan(row['duration']) or row['duration']==0) else row['duration']/10
+#         print("---", fplayer,'---',row['type'])
+#         player.play_note(note, duration)
 
 # Define notes
 def sample_notes(players,music21 = True):

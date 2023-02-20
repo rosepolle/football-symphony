@@ -104,7 +104,7 @@ card_play = dbc.Card(
                     children=[html.Div(id="song-loading-output")], type="default"),
         dbc.Button('Load song', id='btn-load', n_clicks=0),
         html.Div(id='div-play'),
-        dbc.Button('Play with MusicalBeeps', id='btn-play', n_clicks=0),
+        # dbc.Button('Play with MusicalBeeps', id='btn-play', n_clicks=0),
         html.Div(id='div-play-mb'),
     ]),
 )
@@ -180,17 +180,17 @@ def load_music(n_clicks,timestr):
 
 
 # Play music
-@app.callback(
-    Output('div-play-mb', 'children'),
-    Input("btn-play", "n_clicks"),
-    State("store-events", "data"),
-    State("store-notes","data"),
-    prevent_initial_call=True
-)
-def play_music(n_clicks,events,dnotes):
-    if n_clicks>0:
-        df_events = pd.DataFrame(events)
-        utils.play_beeps(df_events,dnotes)
+# @app.callback(
+#     Output('div-play-mb', 'children'),
+#     Input("btn-play", "n_clicks"),
+#     State("store-events", "data"),
+#     State("store-notes","data"),
+#     prevent_initial_call=True
+# )
+# def play_music(n_clicks,events,dnotes):
+#     if n_clicks>0:
+#         df_events = pd.DataFrame(events)
+#         utils.play_beeps(df_events,dnotes)
 
 
 # Callback to display players
