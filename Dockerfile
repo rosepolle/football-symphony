@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y libasound2-dev
 COPY requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 COPY . ./
-RUN cd assets
-RUN ls -lah
+#RUN cd assets
+RUN ls assets
 CMD gunicorn -b 0.0.0.0:80 app.app:server
 
