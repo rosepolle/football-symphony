@@ -6,5 +6,6 @@ COPY requirements.txt ./requirements.txt
 #RUN apt install libasound2 && apt install libasound2-dev
 RUN pip install -r requirements.txt
 COPY . ./
+RUN ls -lah
 CMD gunicorn -b 0.0.0.0:80 app.app:server
 
