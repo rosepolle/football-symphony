@@ -252,15 +252,10 @@ def update_matches_options(gender,comp_name,year):
 )
 def store_events(gender,comp_name,year,match):
     df_events = utils.get_data(df_comp,gender, comp_name, year, match)
-    players = list(df_events['player'].unique())
+    players = list(df_events['player'].dropna().unique())
     return df_events.to_dict("records"),players
 
-# @werkzeug.serving.run_with_reloader
-# def run_server():
-#     app.debug = True
-#     waitress.serve(app, listen='127.0.0.1:8000')
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     app.run_server(debug=True,port=8000,dev_tools_hot_reload = False)
-    # run_server()
