@@ -66,12 +66,19 @@ card_dropdowns = dbc.Card(
     )
 )
 
-card_players_to_notes = dbc.Card(
-    dbc.CardBody([
-        html.Div(id='div-players'),
-        dbc.Button('Shuffle', id='btn-shuffle', n_clicks=0)
-    ]),
-)
+card_players_to_notes = dbc.Card([
+    dbc.CardImg(
+            src="assets/imgs/mbappe_dance.png",
+            style={"opacity": 0.3},
+            id = 'card-players-img'
+        ),
+    dbc.CardImgOverlay(
+        dbc.CardBody([
+            html.Div(id='div-players'),
+            dbc.Button('Shuffle', id='btn-shuffle', n_clicks=0)
+        ],id='card-players-body')
+    )
+],id='card-players')
 
 card_choose_instruments = dbc.Card(
     dbc.CardBody([
@@ -101,7 +108,7 @@ card_choose_instruments = dbc.Card(
 card_play = dbc.Card(
     dbc.CardBody([
         dbc.Button('Generate song', id='btn-generate', n_clicks=0),
-        dcc.Loading(id="song-loading",
+        dcc.Loading(id="song-loading",className='loading-msg',style={'display': 'inline-block'},
                     children=[html.Div(id="song-loading-output")], type="default"),
         dbc.Button('Load song', id='btn-load', n_clicks=0),
         html.Div(id='div-play'),
@@ -117,7 +124,9 @@ app = Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callba
 server = app.server
 # app.css.config.serve_locally = True
 # app.scripts.config.serve_locally = True
-app.layout = dbc.Container([
+app.layout = html.Div([
+    html.Img(src='assets/imgs/background3.png',id='main-background-img'),
+    dbc.Container([
         dcc.Store(id='store-notes'),
         dcc.Store(id='store-matches'),
         dcc.Store(id='store-events'),
@@ -131,14 +140,15 @@ app.layout = dbc.Container([
         dbc.Row([
             dbc.Col([
                 card_players_to_notes,
-            ]),
+            ],id='col-players'),
             dbc.Col([
                 card_choose_instruments,
                 card_play,
             ]),
         ], id='row-main'),
 
-    ],fluid=False)
+    ],fluid=False,id='container')
+])
 
 
 # Generate music
@@ -227,6 +237,7 @@ def update_comp_options(gender):
 )
 def update_comp_options(gender,comp_name):
     options = utils.get_comp_years(df_comp,gender,comp_name)
+    print(options)
     return options,options[0]
 
 @app.callback(
@@ -241,6 +252,7 @@ def update_comp_options(gender,comp_name):
 def update_matches_options(gender,comp_name,year):
     df_matches = utils.get_matches(df_comp,gender,comp_name,year)
     options = list(df_matches['match_name'])
+    print(options)
     return options,options[0],df_matches.to_dict("records")
 
 @app.callback(

@@ -1,21 +1,105 @@
 
 /*****************OUTER LAYOUT***************/
+/*body {*/
+/*    background-image: url("imgs/background2.png");*/
+/*    opacity: 0.3;*/
+/*}*/
 body {
- background-image: url("imgs/background2.png");
+       font-family: monaco;
+     }
+
+#title-row h1{
+    font-family: monaco;
+}
+
+#main-background-img{
+    opacity: 0.5;
+    object-fit: cover;
+    width : 100%;
+    height : 120%;
+    position: absolute;
+}
+#card-players {
+  height: 100%;
+}
+
+.card {
+    background-color: #8288c2 /*#7c8fa1; c8afc9;*/
+}
+
+table td {
+    padding: 0 15px;
+  }
+table th {
+    padding: 0 15px;
+  }
+
+#btn-shuffle{
+    margin-top: 15px;
+    margin-left: 15px;
+}
+
+.loading-msg{
+    display: inline-block;
+}
+
+#song-loading{
+    display: inline-block;
+}
+#btn-generate{
+    display: inline-block;
+}
+
+#btn-load{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    display: block;
+}
+/*#div-generate{*/
+/*    display: inline-block;*/
+/*}*/
+
+/*.card{*/
+/*    height:100%;*/
+/*}*/
+
+/*#players-background-img{*/
+/*    opacity: 0.3;*/
+/*    object-fit: cover;*/
+/*    !*width : 100%;*!*/
+/*    position: absolute;*/
+/*}*/
+
+/*#card-players-body{*/
+/* background-image: url("imgs/mbappe_dance.png");*/
+/*    background-origin: padding-box;*/
+/*    background-clip : padding-box;*/
+/*}*/
+
+
+
+#card-players-img {
+    /*width: 100%;*/
+    height: 100%;
+    object-fit: cover;
 }
 
 .label{
     align:center;
 }
 
-#title-row h1{
-    font-family: Garamond, serif;
-}
+
+
 
 #container{
     /*margin-left: 200px;*/
     /*margin-right: 200px;*/
-    width: 1500px
+    width: 1500px;
+    height : 1000px;
+}
+
+#row-main{
+    height:90%;
 }
 
 #title-row{
@@ -28,22 +112,22 @@ body {
 }
 
 /*****************OVERVIEW***************/
-#overview-table{
-    border: 1px solid;
-}
-.td-border-header{
-    border-left: 1px solid;
-    font-weight: bold;
-    style : inline-block;
-    float:left;
-    width: 100px;
-}
-.td-border{
-    border-left: 1px solid;
-}
-.tr-border{
-    border-top: 1px solid;
-}
+/*#overview-table{*/
+/*    border: 1px solid;*/
+/*}*/
+/*.td-border-header{*/
+/*    border-left: 1px solid;*/
+/*    font-weight: bold;*/
+/*    style : inline-block;*/
+/*    float:left;*/
+/*    width: 100px;*/
+/*}*/
+/*.td-border{*/
+/*    border-left: 1px solid;*/
+/*}*/
+/*.tr-border{*/
+/*    border-top: 1px solid;*/
+/*}*/
 
 
 
@@ -120,31 +204,31 @@ body {
     /*width : 600px*/
 }
 
-/*****************GRAPHS***************/
+/*!*****************GRAPHS***************!*/
 
-/*#graph-row{*/
-/*    margin-top: 30px;*/
+/*!*#graph-row{*!*/
+/*!*    margin-top: 30px;*!*/
+/*!*}*!*/
+
+
+
+/*#graph{*/
+/*    width: 500px;*/
+/*    height: 600px;*/
+/*    !*margin-left: 100px;*!*/
 /*}*/
 
+/*#graph-zoomed{*/
+/*    !*margin-top: 0px;*!*/
+/*    !*margin-left: 100px;*!*/
+/*    !*vertical-align: top;*!*/
+/*    !*horiz-align: right;*!*/
+/*    width: 350px;*/
+/*    height: 300px;*/
+/*}*/
 
-
-#graph{
-    width: 500px;
-    height: 600px;
-    /*margin-left: 100px;*/
-}
-
-#graph-zoomed{
-    /*margin-top: 0px;*/
-    /*margin-left: 100px;*/
-    /*vertical-align: top;*/
-    /*horiz-align: right;*/
-    width: 350px;
-    height: 300px;
-}
-
-#freq-distrib{
-    width : 350px;
-    height : 300px;
-    /*horiz-align: right;*/
-}
+/*#freq-distrib{*/
+/*    width : 350px;*/
+/*    height : 300px;*/
+/*    !*horiz-align: right;*!*/
+/*}*/
