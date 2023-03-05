@@ -1,8 +1,8 @@
 
 /*****************OUTER LAYOUT***************/
-/*body {*/
-/* background-image: url("background.png");*/
-/*}*/
+body {
+ background-image: url("imgs/background2.png");
+}
 
 .label{
     align:center;
