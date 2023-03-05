@@ -159,7 +159,7 @@ def generate_music(n_clicks,events,dnotes,main_instrument,drum_instrument,music2
         for filename in glob.glob("assets/tmp-wav*"):
             os.remove(filename)
         timestr = datetime.now().strftime("%d%m%y_%H%M%S")
-        utils.generate_music21(df_events[:10],dnotes,main_instrument,drum_instrument,
+        utils.generate_music21(df_events,dnotes,main_instrument,drum_instrument,
                                timestr,
                                soundfont= 'assets/soundfont/GeneralUser.sf2')
                                # soundfont='assets/soundfont/ChateauGrand.sf2')
