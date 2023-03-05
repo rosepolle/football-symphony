@@ -140,10 +140,6 @@ app.layout = dbc.Container([
     ],fluid=False)
 
 
-@app.callback(Output("progress", "value"), [Input("interval", "n_intervals")])
-def advance_progress(n):
-    return min(n % 110, 100)
-
 # Generate music
 @app.callback(
     Output('store-timestr', 'data'),
@@ -198,14 +194,11 @@ def load_music(n_clicks,timestr):
 @app.callback(
     Output('div-players', 'children'),
      Output('store-notes','data'),
-    [Input("store-events", "data"),
-     Input("store-players", "data"),
+    [Input("store-players", "data"),
      Input("btn-shuffle", "n_clicks")
      ],
 )
-def update_players_and_notes(events,players,n_clicks):
-    # df_events = pd.DataFrame(events)
-    # players = list(df_events['player'].value_counts().index)
+def update_players_and_notes(players,n_clicks):
     dnotes = utils.sample_notes(players,music21=MUSIC21)
     layout = html.Table([
         html.Thead([html.Tr([html.Th('Player'),html.Th('Note')])]),
