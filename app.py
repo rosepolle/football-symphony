@@ -120,6 +120,7 @@ app.layout = dbc.Container([
         dcc.Store(id='store-notes'),
         dcc.Store(id='store-matches'),
         dcc.Store(id='store-events'),
+        dcc.Store(id='store-players'),
         dcc.Store(id='store-timestr'),
         dcc.Location(id='url', refresh=True),
         dbc.Row(dbc.Col(html.H1("Football Symphony"),id='title-row',className='text-center')),
@@ -198,12 +199,13 @@ def load_music(n_clicks,timestr):
     Output('div-players', 'children'),
      Output('store-notes','data'),
     [Input("store-events", "data"),
+     Input("store-players", "data"),
      Input("btn-shuffle", "n_clicks")
      ],
 )
-def update_players_and_notes(events,n_clicks):
-    df_events = pd.DataFrame(events)
-    players = list(df_events['player'].value_counts().index)
+def update_players_and_notes(events,players,n_clicks):
+    # df_events = pd.DataFrame(events)
+    # players = list(df_events['player'].value_counts().index)
     dnotes = utils.sample_notes(players,music21=MUSIC21)
     layout = html.Table([
         html.Thead([html.Tr([html.Th('Player'),html.Th('Note')])]),
@@ -249,6 +251,7 @@ def update_matches_options(gender,comp_name,year):
 
 @app.callback(
     Output('store-events', 'data'),
+    Output('store-players','data'),
     [Input("dd-gender", "value"),
      Input("dd-comp", "value"),
      Input("dd-year", "value"),
@@ -256,7 +259,8 @@ def update_matches_options(gender,comp_name,year):
 )
 def store_events(gender,comp_name,year,match):
     df_events = utils.get_data(df_comp,gender, comp_name, year, match)
-    return df_events.to_dict("records")
+    players = list(df_events['player'].unique())
+    return df_events.to_dict("records"),players
 
 # @werkzeug.serving.run_with_reloader
 # def run_server():
