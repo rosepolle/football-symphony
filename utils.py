@@ -10,7 +10,8 @@ from music21.note import Note,Rest
 from midi2audio import FluidSynth
 from dash import html
 
-
+DEFAULT_COMP_ID = 43
+DEFAULT_SZN_ID = 3
 snare_drum_pitch = 38
 crash_cymbal_pitch = 49
 closed_high_hat_pitch = 42
@@ -163,9 +164,12 @@ def get_comp_and_szn_id(df,gender,comp_name,year):
     dftmp = df[(df['competition_gender'] == gender)
                & (df['competition_name'] == comp_name)
                & (df['season_name'] == year)]
-    comp_id = int(dftmp['competition_id'])
-    szn_id = int(dftmp['season_id'])
-    return comp_id,szn_id
+    if len(dftmp)>0:
+        comp_id = dftmp['competition_id'].iloc[0]
+        szn_id = dftmp['season_id'].iloc[0]
+        return comp_id,szn_id
+    else:
+        return DEFAULT_COMP_ID,DEFAULT_SZN_ID
 
 def get_match_id(df,gender,comp_name,year,match_name):
     comp_id, szn_id = get_comp_and_szn_id(df, gender, comp_name, year)

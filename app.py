@@ -15,6 +15,7 @@ MUSIC21 = True
 df_comp = sb.competitions().sort_values(by=['competition_id', 'season_id'])
 DEFAULT_GENDER = 'male'
 DEFAULT_COMP = 'FIFA World Cup'
+DEFAULT_COMP_ID = 43
 DEFAULT_YEAR = '2018'
 DEFAULT_MATCH = 'France-Argentina'
 DEFAULT_MAIN = "Choir"
