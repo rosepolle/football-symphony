@@ -95,7 +95,7 @@ def generate_music21(df_events,dnotes,main_instrument,drum_instrument,timestr,so
     s = make_stream(df_events, dnotes,main_instrument,drum_instrument)
     fp = s.write('midi', fp='assets/tmp.mid')
     fs = FluidSynth(soundfont)
-    # fs.midi_to_audio('assets/tmp.mid', 'assets/tmp-wav-%s.wav'%timestr)
+    fs.midi_to_audio('assets/tmp.mid', 'assets/tmp-wav-%s.wav'%timestr)
 
 def get_player(timestr):
     # print(os.path.isfile("assets/tmp-wav-%s.wav"%timestr))
