@@ -6,9 +6,9 @@ import random
 from music21 import *
 from music21 import stream, instrument, tempo
 from music21.note import Note,Rest
-# import musicalbeeps
 from midi2audio import FluidSynth
 from dash import html
+import datetime
 
 DEFAULT_COMP_ID = 43
 DEFAULT_SZN_ID = 3
@@ -17,20 +17,26 @@ crash_cymbal_pitch = 49
 closed_high_hat_pitch = 42
 long_whistle_pitch = 72
 
-def make_goal(part,duration):
-    for _ in range(4):
-        part.append(Note(snare_drum_pitch, quarterLength=duration/8))
-    part.append(Note(crash_cymbal_pitch, quarterLength=duration/2))
+GOAL_DURATION = 2
+SHOT_DURATION = 1
+PASS_DURATION = 0.25
+FOUL_DURATION = 1
+TEMPO = 120
+
+def make_goal(part,ctime):
+    for i in range(4):
+        part.insert(ctime + GOAL_DURATION*i/8,Note(snare_drum_pitch, quarterLength=ctime + GOAL_DURATION/8))
+    part.insert(ctime + GOAL_DURATION/2,Note(crash_cymbal_pitch, quarterLength=ctime + GOAL_DURATION/2))
     return part
-def make_shot(part,duration):
-    part.append(Note(snare_drum_pitch, quarterLength=duration))
+
+def make_shot(part,ctime):
+    part.insert(ctime,Note(snare_drum_pitch, quarterLength=SHOT_DURATION))
     return part
-def make_pass(part,duration):
-    part.append(Note(closed_high_hat_pitch, quarterLength=duration))
-    # part.append(Note(snare_drum_pitch, quarterLength=duration))
+def make_pass(part,ctime):
+    part.insert(ctime,Note(closed_high_hat_pitch, quarterLength=PASS_DURATION))
     return part
-def make_foul(part,duration):
-    part.append(Note(long_whistle_pitch, quarterLength=duration))
+def make_foul(part,ctime):
+    part.insert(ctime,Note(long_whistle_pitch, quarterLength=FOUL_DURATION))
     return part
 
 # define stream
@@ -38,7 +44,9 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
     df_events = df_events.sort_values(by=['minute','second'])
     s = stream.Score(id='mainScore')
 
-    stime = 0
+    summary = {}
+    for team in df_events[:100]['team'].unique():
+        summary[team]=[]
 
     drumPart = stream.Part(id='drum')
     drum_instrument_class = eval('instrument.%s()' % drum_instrument)
@@ -52,66 +60,75 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
     main_instrument_class = eval('instrument.%s()'% main_instrument)
     mainPart.insert(0, main_instrument_class)
 
+    ctime = 0 # current time
     for idx, row in df_events[~df_events['player'].isna()].iterrows():
         fplayer = row['player']
         etype = row['type']
-        # MAIN PART
-        note = dnotes[fplayer]
-        duration = 0.1 if (np.isnan(row['duration']) or row['duration']==0) else row['duration']
-        duration = duration/5
-        # print(etype,"Duration",duration,"time",row['minute'],row['second'])
-        stime += duration
-        n = Note(note, quarterLength=duration)
-        mainPart.append(n)
+        eteam = row['team']
+        eduration = row['duration']/5
+        if not (np.isnan(eduration) or eduration == 0):
+            ctime += eduration
+            # MAIN PART
+            note = dnotes[fplayer]
+            n = Note(note, quarterLength=eduration)
+            mainPart.insert(ctime,n)
         # DRUM PART
         if etype == 'Shot':
-            drumPart = make_shot(drumPart,duration)
+            drumPart = make_shot(drumPart,ctime)
         elif etype == 'Pass':
-            drumPart = make_pass(drumPart,duration)
+            drumPart = make_pass(drumPart,ctime)
         elif etype == 'Foul Committed':
-            drumPart = make_foul(drumPart,duration)
-        else:
-            drumPart.append(Rest(quarterLength=duration))
+            drumPart = make_foul(drumPart,ctime)
         # GOAL PART
         if etype == 'Shot':
             if row['shot_outcome'] == 'Goal':
-                goalPart = make_goal(goalPart,duration)
-                # print("GOAL at %s"%stime)
-            else:
-                goalPart.append(Rest(quarterLength=duration))
-        else:
-            goalPart.append(Rest(quarterLength=duration))
+                goalPart = make_goal(goalPart,ctime)
+                summary[eteam].append({'type':'Goal','time':ctime,'player':fplayer})
+
 
     s.insert(0, mainPart)
     s.insert(0, drumPart)
     s.insert(0, goalPart)
-    mm = tempo.MetronomeMark(number=120)
+    mm = tempo.MetronomeMark(number=TEMPO)
+    quarterDuration = mm.durationToSeconds(1.0)
+    print(quarterDuration)
     s.append(mm)
-    # print("Stream duration", stime)
-    return s
+    print("Stream duration", ctime)
+    return s,summary
 
 # Play music 21 stream
 def generate_music21(df_events,dnotes,main_instrument,drum_instrument,timestr,soundfont):
-    s = make_stream(df_events, dnotes,main_instrument,drum_instrument)
+    s, summary = make_stream(df_events, dnotes,main_instrument,drum_instrument)
     fp = s.write('midi', fp='assets/tmp.mid')
     fs = FluidSynth(soundfont)
     fs.midi_to_audio('assets/tmp.mid', 'assets/tmp-wav-%s.wav'%timestr)
+    return summary
 
 def get_player(timestr):
     # print(os.path.isfile("assets/tmp-wav-%s.wav"%timestr))
     player = html.Audio(id="player",src="assets/tmp-wav-%s.wav"%timestr,controls=True)
     return player
 
+def round_seconds(t):
+    if t.microseconds >= 500_000:
+        t += datetime.timedelta(seconds=1)
+    return t- datetime.timedelta(microseconds=t.microseconds)
 
-# Play musicalBeep
-# def play_beeps(df_events,dnotes):
-#     player = musicalbeeps.Player(volume=0.3, mute_output=False)
-#     for idx,row in df_events[~df_events['player'].isna()].iterrows():
-#         fplayer = row['player']
-#         note = dnotes[fplayer]
-#         duration = 0.1 if (np.isnan(row['duration']) or row['duration']==0) else row['duration']/10
-#         print("---", fplayer,'---',row['type'])
-#         player.play_note(note, duration)
+def make_summary(summary):
+    layout = html.Table([
+        html.Td(
+            html.Table(
+                html.Tbody(
+                    [html.Tr(html.Td(event_string(e))) for e in summary[team]]
+                )
+            )
+        )
+        for team in summary.keys()])
+    return layout
+
+def event_string(event_dict):
+    t = round_seconds(datetime.timedelta(minutes=event_dict['time'] / TEMPO))
+    return event_dict['player'] + '-' + str(t)
 
 # Define notes
 def sample_notes(players,music21 = True):
@@ -176,7 +193,6 @@ def get_match_id(df,gender,comp_name,year,match_name):
     df_matches = sb.matches(competition_id=comp_id, season_id=szn_id)
     df_matches['match_name'] = df_matches['home_team'] + '-' + df_matches['away_team']
     return int(df_matches[df_matches['match_name']==match_name]['match_id'].iloc[0])
-
 
 
 

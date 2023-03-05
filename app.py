@@ -117,6 +117,12 @@ card_play = dbc.Card(
     ]),
 )
 
+card_summary = dbc.Card(
+    dbc.CardBody([
+        html.Div(id='div-match-summary'),
+    ]),
+)
+
 
 # Build App
 app = Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
@@ -144,6 +150,7 @@ app.layout = html.Div([
             dbc.Col([
                 card_choose_instruments,
                 card_play,
+                card_summary,
             ]),
         ], id='row-main'),
 
@@ -155,6 +162,7 @@ app.layout = html.Div([
 @app.callback(
     Output('store-timestr', 'data'),
     Output('song-loading-output', 'children'),
+    Output('div-match-summary', 'children'),
     Input("btn-generate", "n_clicks"),
     State("store-events", "data"),
     State("store-notes","data"),
@@ -169,11 +177,12 @@ def generate_music(n_clicks,events,dnotes,main_instrument,drum_instrument,music2
         for filename in glob.glob("assets/tmp-wav*"):
             os.remove(filename)
         timestr = datetime.now().strftime("%d%m%y_%H%M%S")
-        utils.generate_music21(df_events[:300],dnotes,main_instrument,drum_instrument,
+        summary = utils.generate_music21(df_events,dnotes,main_instrument,drum_instrument,
                                timestr,
                                soundfont= 'assets/soundfont/GeneralUser.sf2')
                                # soundfont='assets/soundfont/ChateauGrand.sf2')
-        return timestr, 'Music generated!'
+
+        return timestr, 'Music generated!',utils.make_summary(summary)
 
 
 # Load music
@@ -185,6 +194,9 @@ def generate_music(n_clicks,events,dnotes,main_instrument,drum_instrument,music2
 )
 def load_music(n_clicks,timestr):
     return utils.get_player(timestr)
+
+
+
 
 
 # Play music
@@ -237,7 +249,6 @@ def update_comp_options(gender):
 )
 def update_comp_options(gender,comp_name):
     options = utils.get_comp_years(df_comp,gender,comp_name)
-    print(options)
     return options,options[0]
 
 @app.callback(
