@@ -90,10 +90,8 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
     s.insert(0, drumPart)
     s.insert(0, goalPart)
     mm = tempo.MetronomeMark(number=TEMPO)
-    quarterDuration = mm.durationToSeconds(1.0)
-    print(quarterDuration)
+    # quarterDuration = mm.durationToSeconds(1.0)
     s.append(mm)
-    print("Stream duration", ctime)
     return s,summary
 
 # Play music 21 stream
@@ -113,6 +111,12 @@ def round_seconds(t):
     if t.microseconds >= 500_000:
         t += datetime.timedelta(seconds=1)
     return t- datetime.timedelta(microseconds=t.microseconds)
+
+
+def get_lineup(match_id):
+    lineups = sb.lineups(match_id=match_id)
+    for team in lineups.keys():
+        print(lineups[team])
 
 def make_summary(summary):
     layout = html.Table([
@@ -154,10 +158,6 @@ def sample_notes(players,music21 = True):
     dnotes = df_ptn[['player','note']].set_index('player').to_dict()['note']
     return dnotes
 
-# Get football data
-def get_data(df,gender, comp_name, year, match_name):
-    match_id = get_match_id(df, gender, comp_name, year, match_name)
-    return sb.events(match_id=match_id)
 
 # Dropdown updates
 def get_comp_names(df,gender):
@@ -166,9 +166,6 @@ def get_comp_names(df,gender):
 def get_comp_years(df,gender,comp_name):
     return list(df[(df['competition_gender'] == gender) & (df['competition_name'] == comp_name)]['season_name'])
 
-def get_matches_list(df,gender,comp_name,year):
-    df_matches = get_matches(df,gender,comp_name,year)
-    return list(df_matches['match_name'])
 
 def get_matches(df,gender,comp_name,year):
     comp_id, szn_id = get_comp_and_szn_id(df,gender,comp_name,year)
@@ -176,6 +173,12 @@ def get_matches(df,gender,comp_name,year):
     df_matches['match_name'] = df_matches['home_team'] + '-' + df_matches['away_team']
     return df_matches
 
+def get_matches_options(df_comp,gender,comp_name,year):
+    df_matches = get_matches(df_comp,gender,comp_name,year)
+    options = df_matches[['match_name','match_id']]\
+        .rename(columns={'match_name':'label','match_id':'value'})\
+        .to_dict(orient='records')
+    return options
 
 def get_comp_and_szn_id(df,gender,comp_name,year):
     dftmp = df[(df['competition_gender'] == gender)
@@ -187,12 +190,3 @@ def get_comp_and_szn_id(df,gender,comp_name,year):
         return comp_id,szn_id
     else:
         return DEFAULT_COMP_ID,DEFAULT_SZN_ID
-
-def get_match_id(df,gender,comp_name,year,match_name):
-    comp_id, szn_id = get_comp_and_szn_id(df, gender, comp_name, year)
-    df_matches = sb.matches(competition_id=comp_id, season_id=szn_id)
-    df_matches['match_name'] = df_matches['home_team'] + '-' + df_matches['away_team']
-    return int(df_matches[df_matches['match_name']==match_name]['match_id'].iloc[0])
-
-
-
