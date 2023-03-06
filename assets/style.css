@@ -8,6 +8,17 @@ body {
        font-family: monaco;
      }
 
+img {
+  max-width: 100%;
+  display: block;
+}
+
+table{
+    width:100%;
+}
+
+
+
 #title-row h1{
     font-family: monaco;
 }
@@ -21,7 +32,14 @@ body {
 }
 #card-players {
   height: 100%;
+  width: 100%;
 }
+#card-players-body {
+  width: 100%;
+}
+
+
+
 
 .card {
     background-color: #8288c2 /*#7c8fa1; c8afc9;*/
@@ -132,28 +150,38 @@ table th {
 
 
 /*****************DROPDOWNS***************/
-#dd-gender{
-    width: 100px;
-    font-size:14px;
-}
-#dd-comp{
-    width: 300px;
-    font-size:14px;
-}
-#dd-year{
-    width: 150px;
-    font-size:14px;
-}
-#dd-match{
-    width: 400px;
+#card-dd-body{
+  display: flex;
+  justify-content: space-between;
     font-size:14px;
 }
 
+.div-dropdown{
+    /*display: inline-block;*/
+    width:100%;
+}
+/*#dd-gender{*/
+/*    width: 100px;*/
+/*    font-size:14px;*/
+/*}*/
+/*#dd-comp{*/
+/*    width: 300px;*/
+/*    font-size:14px;*/
+/*}*/
+/*#dd-year{*/
+/*    width: 150px;*/
+/*    font-size:14px;*/
+/*}*/
+/*#dd-match{*/
+/*    width: 400px;*/
+/*    font-size:14px;*/
+/*}*/
+
 #dd-main-instrument{
-    width: 400px;
+    width: 100%;
 }
 #dd-drum-instrument{
-    width: 400px;
+    width: 100%;
 }
 
 #top-row{
@@ -162,9 +190,7 @@ table th {
     /*margin-left: 100px;*/
 }
 
-.div-dropdown{
-    display: inline-block;
-}
+
 
 
 /*****************Player***************/

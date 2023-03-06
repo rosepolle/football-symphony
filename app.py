@@ -65,8 +65,8 @@ card_dropdowns = dbc.Card(
                 )
             ], className='div-dropdown')
         ]
-    )
-)
+    ,id='card-dd-body')
+,id='card-dd')
 
 card_players_to_notes = dbc.Card([
     dbc.CardImg(
@@ -126,7 +126,13 @@ card_summary = dbc.Card(
 
 
 # Build App
-app = Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app = Dash(__name__,
+           external_stylesheets=[dbc.themes.BOOTSTRAP],
+           suppress_callback_exceptions=True,
+           meta_tags = [
+               {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+                         ]
+           )
 # Read the click count data from the file
 server = app.server
 # app.css.config.serve_locally = True
@@ -145,13 +151,13 @@ app.layout = html.Div([
         ],id='row-dd'),
         dbc.Row([
             dbc.Col([
-                card_players_to_notes,
-            ],id='col-players'),
-            dbc.Col([
                 card_choose_instruments,
                 card_play,
                 card_summary,
-            ]),
+            ],xs=12,sm=12,md=5,lg=6,xl=5),
+            dbc.Col([
+                card_players_to_notes,
+            ],id='col-players',xs=12,sm=12,md=5,lg=6,xl=5),
         ], id='row-main'),
 
     ],fluid=False,id='container')

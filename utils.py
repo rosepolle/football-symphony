@@ -96,6 +96,9 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
     # print(s.duration.quarterLength/quarterDuration)
     # print("Stream duration", ctime)
     s.append(mm)
+    # print('MAIN',mainPart.show('text'))
+    # print('DRUM',drumPart.show('text'))
+    # print('GOAL',goalPart.show('text'))
 
     return s,summary
 
