@@ -86,12 +86,17 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
                 summary[eteam].append({'type':'Goal','time':ctime,'player':fplayer})
 
 
+
     s.insert(0, mainPart)
     s.insert(0, drumPart)
     s.insert(0, goalPart)
     mm = tempo.MetronomeMark(number=TEMPO)
     # quarterDuration = mm.durationToSeconds(1.0)
+    # print(s.duration.quarterLength)
+    # print(s.duration.quarterLength/quarterDuration)
+    # print("Stream duration", ctime)
     s.append(mm)
+
     return s,summary
 
 # Play music 21 stream
@@ -113,10 +118,11 @@ def round_seconds(t):
     return t- datetime.timedelta(microseconds=t.microseconds)
 
 
-def get_lineup(match_id):
-    lineups = sb.lineups(match_id=match_id)
-    for team in lineups.keys():
-        print(lineups[team])
+def player_nicknames(lineups):
+    df_lineups = pd.concat(lineups.values(),axis=0)
+    df_lineups['player_nickname'].fillna(df_lineups['player_name'], inplace=True)
+    return list(df_lineups['player_nickname'])
+
 
 def make_summary(summary):
     layout = html.Table([

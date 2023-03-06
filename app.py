@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 import os
 import glob
+import time
 
 import utils
 
@@ -251,6 +252,8 @@ def update_matches_options(gender,comp_name,year):
 )
 def store_events(match_id):
     df_events = sb.events(match_id=match_id)
+    # lineups = sb.lineups(match_id=match_id)
+    # players = utils.player_nicknames(lineups)
     players = list(df_events['player'].dropna().unique())
     return df_events.to_dict("records"),players
 
