@@ -1,26 +1,35 @@
 
 /*****************OUTER LAYOUT***************/
+#container{
+    /*margin-left: 200px;*/
+    /*margin-right: 200px;*/
+    /*width: 1500px;*/
+    /*height : 1000px;*/
+    /*display: block;*/
+    /*overflow: auto;*/
+    /*height: 100%*/
+    height: fit-content;
+}
 /*body {*/
-/*    background-image: url("imgs/background2.png");*/
-/*    opacity: 0.3;*/
+/*  overflow: visible;*/
 /*}*/
+#row-main{
+    height:90%;
+}
+
+#title-row{
+    align: center;
+}
 body {
        font-family: monaco;
      }
+#title-row h1{
+    font-family: monaco;
+}
 
 img {
   max-width: 100%;
   display: block;
-}
-
-table{
-    width:100%;
-}
-
-
-
-#title-row h1{
-    font-family: monaco;
 }
 
 #main-background-img{
@@ -30,6 +39,16 @@ table{
     height : 120%;
     position: absolute;
 }
+
+.card {
+    background-color: #8288c2 /*#7c8fa1; c8afc9;*/
+}
+
+/*.label{*/
+/*    align:center;*/
+/*}*/
+
+/*****************Players***************/
 #card-players {
   height: 100%;
   width: 100%;
@@ -37,12 +56,20 @@ table{
 #card-players-body {
   width: 100%;
 }
+#btn-shuffle{
+    margin-top: 15px;
+    margin-left: 15px;
+}
+#card-players-img {
+    /*width: 100%;*/
+    height: 100%;
+    object-fit: cover;
+}
 
 
-
-
-.card {
-    background-color: #8288c2 /*#7c8fa1; c8afc9;*/
+/*****************Tables***************/
+table{
+    width:100%;
 }
 
 table td {
@@ -52,102 +79,21 @@ table th {
     padding: 0 15px;
   }
 
-#btn-shuffle{
-    margin-top: 15px;
-    margin-left: 15px;
-}
-
+/*****************Generate/loading***************/
 .loading-msg{
     display: inline-block;
 }
-
 #song-loading{
     display: inline-block;
 }
 #btn-generate{
     display: inline-block;
 }
-
 #btn-load{
     margin-top: 5px;
     margin-bottom: 5px;
     display: block;
 }
-/*#div-generate{*/
-/*    display: inline-block;*/
-/*}*/
-
-/*.card{*/
-/*    height:100%;*/
-/*}*/
-
-/*#players-background-img{*/
-/*    opacity: 0.3;*/
-/*    object-fit: cover;*/
-/*    !*width : 100%;*!*/
-/*    position: absolute;*/
-/*}*/
-
-/*#card-players-body{*/
-/* background-image: url("imgs/mbappe_dance.png");*/
-/*    background-origin: padding-box;*/
-/*    background-clip : padding-box;*/
-/*}*/
-
-
-
-#card-players-img {
-    /*width: 100%;*/
-    height: 100%;
-    object-fit: cover;
-}
-
-.label{
-    align:center;
-}
-
-
-
-
-#container{
-    /*margin-left: 200px;*/
-    /*margin-right: 200px;*/
-    width: 1500px;
-    height : 1000px;
-}
-
-#row-main{
-    height:90%;
-}
-
-#title-row{
-    align: center;
-}
-
-/*****************ASSUMTPIONS MISSING***************/
-.div-missing{
-    margin-top: 20px;
-}
-
-/*****************OVERVIEW***************/
-/*#overview-table{*/
-/*    border: 1px solid;*/
-/*}*/
-/*.td-border-header{*/
-/*    border-left: 1px solid;*/
-/*    font-weight: bold;*/
-/*    style : inline-block;*/
-/*    float:left;*/
-/*    width: 100px;*/
-/*}*/
-/*.td-border{*/
-/*    border-left: 1px solid;*/
-/*}*/
-/*.tr-border{*/
-/*    border-top: 1px solid;*/
-/*}*/
-
-
 
 /*****************DROPDOWNS***************/
 #card-dd-body{
@@ -160,22 +106,6 @@ table th {
     /*display: inline-block;*/
     width:100%;
 }
-/*#dd-gender{*/
-/*    width: 100px;*/
-/*    font-size:14px;*/
-/*}*/
-/*#dd-comp{*/
-/*    width: 300px;*/
-/*    font-size:14px;*/
-/*}*/
-/*#dd-year{*/
-/*    width: 150px;*/
-/*    font-size:14px;*/
-/*}*/
-/*#dd-match{*/
-/*    width: 400px;*/
-/*    font-size:14px;*/
-/*}*/
 
 #dd-main-instrument{
     width: 100%;
@@ -190,11 +120,7 @@ table th {
     /*margin-left: 100px;*/
 }
 
-
-
-
-/*****************Player***************/
-
+/*****************Music Player***************/
 #div-play{
     width: 100%;
 }
@@ -203,58 +129,5 @@ table th {
 }
 
 
-/*****************VAR DETAILS***************/
-.header{
-    font-weight: bold;
-    style : inline-block;
-    float:left;
-    width: 100px;
-}
 
 
-
-.cell{
-    horiz-align: left;
-    word-wrap:break-word;
-}
-
-.descr{
-    style : inline-block;
-}
-
-#div-descr{
-    /*margin-top: 10px;*/
-}
-
-#descr-table{
-    /*width : 600px*/
-}
-
-/*!*****************GRAPHS***************!*/
-
-/*!*#graph-row{*!*/
-/*!*    margin-top: 30px;*!*/
-/*!*}*!*/
-
-
-
-/*#graph{*/
-/*    width: 500px;*/
-/*    height: 600px;*/
-/*    !*margin-left: 100px;*!*/
-/*}*/
-
-/*#graph-zoomed{*/
-/*    !*margin-top: 0px;*!*/
-/*    !*margin-left: 100px;*!*/
-/*    !*vertical-align: top;*!*/
-/*    !*horiz-align: right;*!*/
-/*    width: 350px;*/
-/*    height: 300px;*/
-/*}*/
-
-/*#freq-distrib{*/
-/*    width : 350px;*/
-/*    height : 300px;*/
-/*    !*horiz-align: right;*!*/
-/*}*/
