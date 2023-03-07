@@ -121,7 +121,7 @@ card_play = dbc.Card(
 card_summary = dbc.Card(
     dbc.CardBody([
         html.Div(id='div-match-summary'),
-    ]),
+    ],id='card_summary_body'),id='card_summary'
 )
 
 

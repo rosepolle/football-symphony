@@ -6,25 +6,22 @@
     font-family: 'WavvHa-Regular';
     src: url('fonts/WavvHa-Regular.ttf');
 }
+/*@font-face {*/
+/*    font-family: 'digital7';*/
+/*    src: url('fonts/digital-7.ttf');*/
+/*}*/
+/*@font-face {*/
+/*    font-family: 'open24';*/
+/*    src: url('fonts/Open-24-Display.ttf');*/
+/*}*/
 @font-face {
-    font-family: 'digital7';
-    src: url('fonts/digital-7.ttf');
-}
-@font-face {
-    font-family: 'open24';
-    src: url('fonts/Open-24-Display.ttf');
+    font-family: 'gameplay';
+    src: url('fonts/Gameplay.ttf');
 }
 
 
 
 /*****************OUTER LAYOUT***************/
-
-/*#col-players{*/
-/*    width:50%;*/
-/*}*/
-/*#col-load{*/
-/*    width:50%;*/
-/*}*/
 
 #container{
     height: 1000px;
@@ -32,24 +29,32 @@
 
 #row-main{
     height:90%;
+    align-content: flex-start;
 }
 
 #title-row{
     align: center;
 }
 body {
-       font-family: '395-Eq', sans-serif;
-     }
+    font-family: '395-Eq', sans-serif;
+}
 #div-dd-year{
-    font-family: 'open24';
-    font-weight: bold;
+    font-family: 'gameplay';
+    /*font-weight: bold;*/
+    font-size:12px;
 }
 
 .td-note{
-    font-family: 'open24';
-    font-weight: bold;
-    font-size:18px;
+    font-family: 'gameplay';
+    /*font-weight: bold;*/
+    font-size:12px;
 }
+#div-match-summary{
+    font-family: 'gameplay';
+    /*font-weight: bold;*/
+    font-size:11px;
+}
+
 
 
 #title-row h1{
@@ -122,6 +127,18 @@ table th {
     display: block;
 }
 
+#div-match-summary{
+    padding : 0px;
+}
+#card_summary_body{
+    padding : 5px;
+}
+
+#div-match-summary td{
+    vertical-align:top;
+    padding:0;
+}
+
 /*****************DROPDOWNS***************/
 #card-dd-body{
     display: flex;
@@ -148,18 +165,6 @@ table th {
 #div-dd-match{
     flex: 3 1 0;
 }
-
-/*option {*/
-/*  white-space: pre-wrap;*/
-/*    word-break:break-all;*/
-/*    line-height: 10px;*/
-/*}*/
-/*select{*/
-/*    padding: 0;*/
-/*}*/
-/*select option {*/
-/*  line-height: 5px;!important;*/
-/*}*/
 
 @media screen and (max-width:990px) {
   #div-dd-gender { flex-basis: 30%; }
