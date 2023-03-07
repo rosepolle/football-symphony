@@ -1,18 +1,27 @@
+@font-face {
+    font-family: '395-Eq';
+    src: url('fonts/395 Equalizer.ttf');
+}
+@font-face {
+    font-family: 'WavvHa-Regular';
+    src: url('fonts/WavvHa-Regular.ttf');
+}
+
+
 
 /*****************OUTER LAYOUT***************/
-#container{
-    /*margin-left: 200px;*/
-    /*margin-right: 200px;*/
-    /*width: 1500px;*/
-    /*height : 1000px;*/
-    /*display: block;*/
-    /*overflow: auto;*/
-    /*height: 100%*/
-    height: fit-content;
-}
-/*body {*/
-/*  overflow: visible;*/
+
+/*#col-players{*/
+/*    width:50%;*/
 /*}*/
+/*#col-load{*/
+/*    width:50%;*/
+/*}*/
+
+#container{
+    height: 1000px;
+}
+
 #row-main{
     height:90%;
 }
@@ -21,10 +30,11 @@
     align: center;
 }
 body {
-       font-family: monaco;
+       font-family: '395-Eq', sans-serif;
      }
 #title-row h1{
-    font-family: monaco;
+    font-family: 'WavvHa-Regular', sans-serif;
+    font-size: 6vw;
 }
 
 img {
@@ -41,12 +51,9 @@ img {
 }
 
 .card {
-    background-color: #8288c2 /*#7c8fa1; c8afc9;*/
+    background-color: #8288c2
 }
 
-/*.label{*/
-/*    align:center;*/
-/*}*/
 
 /*****************Players***************/
 #card-players {
@@ -99,13 +106,28 @@ table th {
 #card-dd-body{
   display: flex;
   justify-content: space-between;
-    font-size:14px;
+    /*font-size:14px;*/
 }
 
 .div-dropdown{
     /*display: inline-block;*/
     width:100%;
+    font-size:15px;
 }
+
+#div-dd-gender{
+    flex: 1 1 0;
+}
+#div-dd-comp{
+    flex: 2 1 0;
+}
+#div-dd-year{
+    flex: 1 1 0;
+}
+#div-dd-match{
+    flex: 3 1 0;
+}
+
 
 #dd-main-instrument{
     width: 100%;

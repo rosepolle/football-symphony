@@ -13,12 +13,12 @@ import utils
 
 # Global var
 DF_COMP = sb.competitions().sort_values(by=['competition_id', 'season_id'])
-DEFAULT_GENDER = 'male'
-DEFAULT_COMP = 'FIFA World Cup'
-DEFAULT_COMP_ID = 43
-DEFAULT_YEAR = '2018'
-DEFAULT_MATCH = 'France-Argentina'
-DEFAULT_MATCH_ID = 7580
+DEFAULT_GENDER = 'female'
+DEFAULT_COMP = "UEFA Women's Euro"
+DEFAULT_COMP_ID = 53
+DEFAULT_YEAR = '2022'
+DEFAULT_MATCH = "France Women's-Argentina Women's"
+DEFAULT_MATCH_ID = 3835333
 DEFAULT_MAIN = "Choir"
 
 DRUM_INSTRUMENTS = ['Agogo', 'BassDrum', 'BongoDrums', 'Castanets', 'ChurchBells', 'CongaDrum', 'Cowbell', 'CrashCymbals', 'Cymbals', 'Dulcimer', 'FingerCymbals', 'Glockenspiel', 'Gong', 'Handbells', 'HiHatCymbal', 'Kalimba', 'Maracas', 'Marimba', 'PitchedPercussion', 'Ratchet', 'RideCymbals', 'SandpaperBlocks', 'Siren', 'SizzleCymbal', 'SleighBells', 'SnareDrum', 'SplashCymbals', 'SteelDrum', 'SuspendedCymbal', 'Taiko', 'TamTam', 'Tambourine', 'TempleBlock', 'TenorDrum', 'Timbales', 'Timpani', 'TomTom', 'Triangle', 'TubularBells', 'UnpitchedPercussion', 'Vibraphone', 'Vibraslap', 'Whip', 'WindMachine', 'Woodblock', 'Xylophone']
@@ -36,7 +36,7 @@ card_dropdowns = dbc.Card(
                              {'label':'Male','value':'male'}],
                     persistence=True
                 ),
-            ], className='div-dropdown'),
+            ], className='div-dropdown',id='div-dd-gender'),
             html.Div([
                 dcc.Dropdown(
                     className='dropdown',
@@ -45,7 +45,7 @@ card_dropdowns = dbc.Card(
                     value=DEFAULT_COMP,
                     persistence=True
                 ),
-            ], className='div-dropdown'),
+            ], className='div-dropdown',id='div-dd-comp'),
             html.Div([
                 dcc.Dropdown(
                     className='dropdown',
@@ -54,7 +54,7 @@ card_dropdowns = dbc.Card(
                     value=DEFAULT_YEAR,
                     persistence=True
                 )
-            ], className='div-dropdown'),
+            ], className='div-dropdown',id='div-dd-year'),
             html.Div([
                 dcc.Dropdown(
                     className='dropdown',
@@ -63,7 +63,7 @@ card_dropdowns = dbc.Card(
                     value=DEFAULT_MATCH_ID,
                     persistence=True
                 )
-            ], className='div-dropdown')
+            ], className='div-dropdown',id='div-dd-match')
         ]
     ,id='card-dd-body')
 ,id='card-dd')
@@ -145,7 +145,7 @@ app.layout = html.Div([
         dcc.Store(id='store-players'),
         dcc.Store(id='store-timestr'),
         dcc.Location(id='url', refresh=True),
-        dbc.Row(dbc.Col(html.H1("Football Symphony"),id='title-row',className='text-center')),
+        dbc.Row(dbc.Col(html.H1("Football Opera"),id='title-row',className='text-center')),
         dbc.Row([
             dbc.Col(card_dropdowns)
         ],id='row-dd'),
@@ -154,10 +154,10 @@ app.layout = html.Div([
                 card_choose_instruments,
                 card_play,
                 card_summary,
-            ],xs=12,sm=12,md=5,lg=6,xl=5),
+            ],xs=12,sm=12,md=12,lg=6,xl=6,id='col-load'),
             dbc.Col([
                 card_players_to_notes,
-            ],id='col-players',xs=12,sm=12,md=5,lg=6,xl=5),
+            ],id='col-players',xs=12,sm=12,md=12,lg=6,xl=6),
         ], id='row-main'),
 
     ],fluid=False,id='container')
