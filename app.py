@@ -213,7 +213,7 @@ def update_players_and_notes(players,n_clicks):
     dnotes = utils.sample_notes(players,music21=True)
     layout = html.Table([
         html.Thead([html.Tr([html.Th('Player'),html.Th('Note')])]),
-        html.Tbody([html.Tr([html.Td(player),html.Td(note)]) for player,note in dnotes.items()])])
+        html.Tbody([html.Tr([html.Td(player),html.Td(note,className='td-note')]) for player,note in dnotes.items()])])
     return layout ,dnotes
 
 

@@ -6,6 +6,14 @@
     font-family: 'WavvHa-Regular';
     src: url('fonts/WavvHa-Regular.ttf');
 }
+@font-face {
+    font-family: 'digital7';
+    src: url('fonts/digital-7.ttf');
+}
+@font-face {
+    font-family: 'open24';
+    src: url('fonts/Open-24-Display.ttf');
+}
 
 
 
@@ -32,6 +40,18 @@
 body {
        font-family: '395-Eq', sans-serif;
      }
+#div-dd-year{
+    font-family: 'open24';
+    font-weight: bold;
+}
+
+.td-note{
+    font-family: 'open24';
+    font-weight: bold;
+    font-size:18px;
+}
+
+
 #title-row h1{
     font-family: 'WavvHa-Regular', sans-serif;
     font-size: 6vw;
@@ -104,8 +124,9 @@ table th {
 
 /*****************DROPDOWNS***************/
 #card-dd-body{
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    flex-wrap: wrap ;
+    justify-content: space-between;
     /*font-size:14px;*/
 }
 
@@ -126,6 +147,23 @@ table th {
 }
 #div-dd-match{
     flex: 3 1 0;
+}
+
+/*option {*/
+/*  white-space: pre-wrap;*/
+/*    word-break:break-all;*/
+/*    line-height: 10px;*/
+/*}*/
+/*select{*/
+/*    padding: 0;*/
+/*}*/
+/*select option {*/
+/*  line-height: 5px;!important;*/
+/*}*/
+
+@media screen and (max-width:990px) {
+  #div-dd-gender { flex-basis: 30%; }
+    #div-dd-comp { flex-basis: 70%; }
 }
 
 
