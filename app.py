@@ -115,7 +115,7 @@ card_play = dbc.Card(
         dbc.Button('Load song', id='btn-load', n_clicks=0),
         html.Div(id='div-play'),
         html.Div(id='div-play-mb'),
-    ]),
+    ])
 )
 
 card_summary = dbc.Card(
@@ -157,7 +157,8 @@ app.layout = html.Div([
             ],xs=12,sm=12,md=12,lg=6,xl=6,id='col-load'),
             dbc.Col([
                 card_players_to_notes,
-            ],id='col-players',xs=12,sm=12,md=12,lg=6,xl=6),
+            ],id='col-players',
+                xs=12,sm=12,md=12,lg=6,xl=6),
         ], id='row-main'),
 
     ],fluid=False,id='container')
