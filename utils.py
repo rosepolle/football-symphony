@@ -41,7 +41,13 @@ def make_foul(part,ctime):
 
 # define stream
 def make_stream(df_events,dnotes,main_instrument,drum_instrument):
-    df_events = df_events.sort_values(by=['minute','second'])
+
+    if 'minute' in df_events.columns:
+        time_cols = ['minute','second']
+    else:
+        time_cols = ['timestamp']
+
+    df_events = df_events.sort_values(by=time_cols)
     s = stream.Score(id='mainScore')
 
     summary = {}
