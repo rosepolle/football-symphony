@@ -7,6 +7,7 @@ from datetime import datetime
 import os
 import glob
 import time
+import pickle
 
 import utils
 
@@ -24,24 +25,29 @@ DEFAULT_MAIN = "Choir"
 DRUM_INSTRUMENTS = ['Agogo', 'BassDrum', 'BongoDrums', 'Castanets', 'ChurchBells', 'CongaDrum', 'Cowbell', 'CrashCymbals', 'Cymbals', 'Dulcimer', 'FingerCymbals', 'Glockenspiel', 'Gong', 'Handbells', 'HiHatCymbal', 'Kalimba', 'Maracas', 'Marimba', 'PitchedPercussion', 'Ratchet', 'RideCymbals', 'SandpaperBlocks', 'Siren', 'SizzleCymbal', 'SleighBells', 'SnareDrum', 'SplashCymbals', 'SteelDrum', 'SuspendedCymbal', 'Taiko', 'TamTam', 'Tambourine', 'TempleBlock', 'TenorDrum', 'Timbales', 'Timpani', 'TomTom', 'Triangle', 'TubularBells', 'UnpitchedPercussion', 'Vibraphone', 'Vibraslap', 'Whip', 'WindMachine', 'Woodblock', 'Xylophone']
 MAIN_INSTRUMENTS = ['Accordion', 'AcousticBass', 'AcousticGuitar', 'Alto', 'AltoSaxophone', 'Bagpipes', 'Banjo', 'Baritone', 'BaritoneSaxophone', 'Bass', 'BassClarinet', 'BassTrombone', 'Bassoon', 'BrassInstrument', 'Celesta', 'Choir', 'Clarinet', 'Clavichord', 'Conductor', 'Contrabass', 'Contrabassoon', 'ElectricBass', 'ElectricGuitar', 'ElectricOrgan', 'ElectricPiano', 'EnglishHorn', 'Flute', 'FretlessBass', 'Guitar', 'Harmonica', 'Harp', 'Harpsichord', 'Horn', 'KeyboardInstrument', 'Koto', 'Lute', 'Mandolin', 'MezzoSoprano', 'Oboe', 'Ocarina', 'Organ', 'PanFlute', 'Percussion', 'Piano', 'Piccolo', 'PipeOrgan', 'Recorder', 'ReedOrgan', 'Sampler', 'Saxophone', 'Shakuhachi', 'Shamisen', 'Shehnai', 'Sitar', 'Soprano', 'SopranoSaxophone', 'StringInstrument', 'Tenor', 'TenorSaxophone', 'Trombone', 'Trumpet', 'Tuba', 'Ukulele', 'Viola', 'Violin', 'Violoncello', 'Vocalist', 'Whistle', 'WoodwindInstrument']
 
+
+with open('assets/comp_dict.pickle', 'rb') as handle:
+    COMP_DICT = pickle.load(handle)
+
+
 card_dropdowns = dbc.Card(
     dbc.CardBody(
         [
-            html.Div([
-                dcc.Dropdown(
-                    className='dropdown',
-                    id='dd-gender', clearable=False,
-                    value=DEFAULT_GENDER,
-                    options=[{'label':'Female','value':'female'},
-                             {'label':'Male','value':'male'}],
-                    persistence=True
-                ),
-            ], className='div-dropdown',id='div-dd-gender'),
+            # html.Div([
+            #     dcc.Dropdown(
+            #         className='dropdown',
+            #         id='dd-gender', clearable=False,
+            #         value=DEFAULT_GENDER,
+            #         options=[{'label':'Female','value':'female'},
+            #                  {'label':'Male','value':'male'}],
+            #         persistence=True
+            #     ),
+            # ], className='div-dropdown',id='div-dd-gender'),
             html.Div([
                 dcc.Dropdown(
                     className='dropdown',
                     id='dd-comp', clearable=False,
-                    options=utils.get_comp_names(DF_COMP, DEFAULT_GENDER),
+                    options=list(COMP_DICT.values()),#utils.get_comp_names(DF_COMP, DEFAULT_GENDER),
                     value=DEFAULT_COMP,
                     persistence=True
                 ),
@@ -50,7 +56,7 @@ card_dropdowns = dbc.Card(
                 dcc.Dropdown(
                     className='dropdown',
                     id='dd-year', clearable=False,
-                    options=utils.get_comp_years(DF_COMP, DEFAULT_GENDER, DEFAULT_COMP),
+                    options=utils.get_comp_years(DF_COMP, DEFAULT_COMP),
                     value=DEFAULT_YEAR,
                     persistence=True
                 )
@@ -59,7 +65,7 @@ card_dropdowns = dbc.Card(
                 dcc.Dropdown(
                     className='dropdown',
                     id='dd-match', clearable=False,
-                    options=utils.get_matches_options(DF_COMP, DEFAULT_GENDER, DEFAULT_COMP, DEFAULT_YEAR),
+                    options=utils.get_matches_options(DF_COMP, DEFAULT_COMP, DEFAULT_YEAR),
                     value=DEFAULT_MATCH_ID,
                     persistence=True
                 )
@@ -219,37 +225,35 @@ def update_players_and_notes(players,n_clicks):
 
 
 # Define callback to update dropdown when values are changed
-@app.callback(
-    Output('dd-comp', 'options'),
-    Output('dd-comp', 'value'),
-    [Input("dd-gender", "value")],
-    prevent_initial_call=True
-)
-def update_comp_options(gender):
-    options = utils.get_comp_names(DF_COMP, gender)
-    return options,options[0]
+# @app.callback(
+#     Output('dd-comp', 'options'),
+#     Output('dd-comp', 'value'),
+#     [Input("dd-gender", "value")],
+#     prevent_initial_call=True
+# )
+# def update_comp_options(gender):
+#     options = utils.get_comp_names(DF_COMP, gender)
+#     return options,options[0]
 
-@app.callback(
-    Output('dd-year', 'options'),
-    Output('dd-year', 'value'),
-    [Input("dd-gender", "value"),
-     Input("dd-comp", "value")],
-    prevent_initial_call=True
-)
-def update_comp_options(gender,comp_name):
-    options = utils.get_comp_years(DF_COMP, gender, comp_name)
-    return options,options[0]
+# @app.callback(
+#     Output('dd-year', 'options'),
+#     Output('dd-year', 'value'),
+#     [Input("dd-comp", "value")],
+#     prevent_initial_call=True
+# )
+# def update_comp_options(gender,comp_name):
+#     options = utils.get_comp_years(DF_COMP, comp_name)
+#     return options,options[0]
 
 @app.callback(
     Output('dd-match', 'options'),
     Output('dd-match', 'value'),
-    [Input("dd-gender", "value"),
-     Input("dd-comp", "value"),
+    [Input("dd-comp", "value"),
      Input("dd-year", "value")],
     prevent_initial_call=True
 )
-def update_matches_options(gender,comp_name,year):
-    options = utils.get_matches_options(DF_COMP, gender, comp_name, year)
+def update_matches_options(comp_name,year):
+    options = utils.get_matches_options(DF_COMP, comp_name, year)
     return options,options[0]['value']
 
 @app.callback(

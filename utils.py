@@ -10,6 +10,14 @@ from midi2audio import FluidSynth
 from dash import html
 import datetime
 
+
+COLUMNS_EVENTS = [
+    'minute','second','team','player','type','duration','shot_outcome'
+]
+
+COLUMNS_LINEUPS = ['']
+
+
 DEFAULT_COMP_ID = 43
 DEFAULT_SZN_ID = 3
 snare_drum_pitch = 38
@@ -39,15 +47,22 @@ def make_foul(part,ctime):
     part.insert(ctime,Note(long_whistle_pitch, quarterLength=FOUL_DURATION))
     return part
 
+def sort_df_events_time(df_events):
+    cols = df_events.columns
+    if 'minute' in cols:
+        time_cols = ['minute','second']
+    elif 'timestamp' in cols:
+        time_cols = ['timestamp']
+    else:
+        time_cols = []
+        raise Warning("Not sorted by time")
+    return df_events.sort_values(by=time_cols)
+
 # define stream
 def make_stream(df_events,dnotes,main_instrument,drum_instrument):
 
-    if 'minute' in df_events.columns:
-        time_cols = ['minute','second']
-    else:
-        time_cols = ['timestamp']
+    df_events =sort_df_events_time(df_events)
 
-    df_events = df_events.sort_values(by=time_cols)
     s = stream.Score(id='mainScore')
 
     summary = {}
@@ -175,29 +190,28 @@ def sample_notes(players,music21 = True):
 
 
 # Dropdown updates
-def get_comp_names(df,gender):
-    return list(df[df['competition_gender']==gender]['competition_name'].unique())
+# def get_comp_names(df,gender):
+#     return list(df[df['competition_gender']==gender]['competition_name'].unique())
 
-def get_comp_years(df,gender,comp_name):
-    return list(df[(df['competition_gender'] == gender) & (df['competition_name'] == comp_name)]['season_name'])
+def get_comp_years(df,comp_name):
+    return list(df[df['competition_name'] == comp_name]['season_name'])
 
 
-def get_matches(df,gender,comp_name,year):
-    comp_id, szn_id = get_comp_and_szn_id(df,gender,comp_name,year)
+def get_matches(df,comp_name,year):
+    comp_id, szn_id = get_comp_and_szn_id(df,comp_name,year)
     df_matches = sb.matches(competition_id=comp_id, season_id=szn_id)
     df_matches['match_name'] = df_matches['home_team'] + '-' + df_matches['away_team']
     return df_matches
 
-def get_matches_options(df_comp,gender,comp_name,year):
-    df_matches = get_matches(df_comp,gender,comp_name,year)
+def get_matches_options(df_comp,comp_name,year):
+    df_matches = get_matches(df_comp,comp_name,year)
     options = df_matches[['match_name','match_id']]\
         .rename(columns={'match_name':'label','match_id':'value'})\
         .to_dict(orient='records')
     return options
 
-def get_comp_and_szn_id(df,gender,comp_name,year):
-    dftmp = df[(df['competition_gender'] == gender)
-               & (df['competition_name'] == comp_name)
+def get_comp_and_szn_id(df,comp_name,year):
+    dftmp = df[(df['competition_name'] == comp_name)
                & (df['season_name'] == year)]
     if len(dftmp)>0:
         comp_id = dftmp['competition_id'].iloc[0]
