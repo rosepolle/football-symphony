@@ -33,7 +33,10 @@
 }
 
 #title-row{
-    align: center;
+    box-align: center;
+}#title-row h1{
+    font-family: 'WavvHa-Regular', sans-serif;
+    font-size: 6vw;
 }
 body {
     font-family: '395-Eq', sans-serif;
@@ -55,13 +58,6 @@ body {
     font-size:11px;
 }
 
-
-
-#title-row h1{
-    font-family: 'WavvHa-Regular', sans-serif;
-    font-size: 6vw;
-}
-
 img {
   max-width: 100%;
   display: block;
@@ -71,7 +67,7 @@ img {
     opacity: 0.7;
     object-fit: cover;
     width : 100%;
-    height : 1000px;
+    /* height : 1000px; */
     position: absolute;
 }
 

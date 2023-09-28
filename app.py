@@ -12,60 +12,62 @@ import pickle
 import utils
 
 
-# Global var
-DF_COMP = sb.competitions().sort_values(by=['competition_id', 'season_id'])
-DEFAULT_GENDER = 'female'
-DEFAULT_COMP = "UEFA Women's Euro"
-DEFAULT_COMP_ID = 53
-DEFAULT_YEAR = '2022'
-DEFAULT_MATCH = "France Women's-Argentina Women's"
-DEFAULT_MATCH_ID = 3835333
-DEFAULT_MAIN = "Choir"
-
+# --------------- Global vars -------------------------
+# Instruments
 DRUM_INSTRUMENTS = ['Agogo', 'BassDrum', 'BongoDrums', 'Castanets', 'ChurchBells', 'CongaDrum', 'Cowbell', 'CrashCymbals', 'Cymbals', 'Dulcimer', 'FingerCymbals', 'Glockenspiel', 'Gong', 'Handbells', 'HiHatCymbal', 'Kalimba', 'Maracas', 'Marimba', 'PitchedPercussion', 'Ratchet', 'RideCymbals', 'SandpaperBlocks', 'Siren', 'SizzleCymbal', 'SleighBells', 'SnareDrum', 'SplashCymbals', 'SteelDrum', 'SuspendedCymbal', 'Taiko', 'TamTam', 'Tambourine', 'TempleBlock', 'TenorDrum', 'Timbales', 'Timpani', 'TomTom', 'Triangle', 'TubularBells', 'UnpitchedPercussion', 'Vibraphone', 'Vibraslap', 'Whip', 'WindMachine', 'Woodblock', 'Xylophone']
 MAIN_INSTRUMENTS = ['Accordion', 'AcousticBass', 'AcousticGuitar', 'Alto', 'AltoSaxophone', 'Bagpipes', 'Banjo', 'Baritone', 'BaritoneSaxophone', 'Bass', 'BassClarinet', 'BassTrombone', 'Bassoon', 'BrassInstrument', 'Celesta', 'Choir', 'Clarinet', 'Clavichord', 'Conductor', 'Contrabass', 'Contrabassoon', 'ElectricBass', 'ElectricGuitar', 'ElectricOrgan', 'ElectricPiano', 'EnglishHorn', 'Flute', 'FretlessBass', 'Guitar', 'Harmonica', 'Harp', 'Harpsichord', 'Horn', 'KeyboardInstrument', 'Koto', 'Lute', 'Mandolin', 'MezzoSoprano', 'Oboe', 'Ocarina', 'Organ', 'PanFlute', 'Percussion', 'Piano', 'Piccolo', 'PipeOrgan', 'Recorder', 'ReedOrgan', 'Sampler', 'Saxophone', 'Shakuhachi', 'Shamisen', 'Shehnai', 'Sitar', 'Soprano', 'SopranoSaxophone', 'StringInstrument', 'Tenor', 'TenorSaxophone', 'Trombone', 'Trumpet', 'Tuba', 'Ukulele', 'Viola', 'Violin', 'Violoncello', 'Vocalist', 'Whistle', 'WoodwindInstrument']
 
+# Data from preprocessing
+COMPS = pd.read_parquet('assets/data/competitions.parquet',engine='pyarrow')
+with open('assets/data/comp_itn.pickle', 'rb') as handle:
+    COMP_ITN = pickle.load(handle)
+with open('assets/data/szn_itn.pickle', 'rb') as handle:
+    SZN_ITN = pickle.load(handle)
+with open('assets/data/comp_to_szns.pickle', 'rb') as handle:
+    COMP_TO_SZNS = pickle.load(handle)
+with open('assets/data/szn_to_matches.pickle', 'rb') as handle:
+    SZN_TO_MATCHES = pickle.load(handle)
+with open('assets/data/matches_itn.pickle', 'rb') as handle:
+    MATCHES_ITN = pickle.load(handle)
 
-with open('assets/comp_dict.pickle', 'rb') as handle:
-    COMP_DICT = pickle.load(handle)
+# Default values
+DEFAULT_MAIN = "Choir"
+DEFAULT_COMP_ID = 53 #"UEFA Women's Euro"
+DEFAULT_SZN_ID = 106 #'2022'
+DEFAULT_MATCH_ID = 3835333 #France Women's-Argentina Women's
 
 
+
+# --------------- Conponents -------------------------
 card_dropdowns = dbc.Card(
     dbc.CardBody(
         [
-            # html.Div([
-            #     dcc.Dropdown(
-            #         className='dropdown',
-            #         id='dd-gender', clearable=False,
-            #         value=DEFAULT_GENDER,
-            #         options=[{'label':'Female','value':'female'},
-            #                  {'label':'Male','value':'male'}],
-            #         persistence=True
-            #     ),
-            # ], className='div-dropdown',id='div-dd-gender'),
             html.Div([
                 dcc.Dropdown(
                     className='dropdown',
                     id='dd-comp', clearable=False,
-                    options=list(COMP_DICT.values()),#utils.get_comp_names(DF_COMP, DEFAULT_GENDER),
-                    value=DEFAULT_COMP,
-                    persistence=True
+                    options=[{'label':comp_name,'value':comp_id}
+                             for comp_id, comp_name in COMP_ITN.items()],
+                    value=DEFAULT_COMP_ID,
+                    persistence=False
                 ),
             ], className='div-dropdown',id='div-dd-comp'),
             html.Div([
                 dcc.Dropdown(
                     className='dropdown',
-                    id='dd-year', clearable=False,
-                    options=utils.get_comp_years(DF_COMP, DEFAULT_COMP),
-                    value=DEFAULT_YEAR,
+                    id='dd-szn', clearable=False,
+                    options= [{'label': SZN_ITN[szn_id],'value' : szn_id } 
+                              for szn_id in COMP_TO_SZNS[DEFAULT_COMP_ID]], 
+                    value=DEFAULT_SZN_ID,
                     persistence=True
                 )
-            ], className='div-dropdown',id='div-dd-year'),
+            ], className='div-dropdown',id='div-dd-szn'),
             html.Div([
                 dcc.Dropdown(
                     className='dropdown',
                     id='dd-match', clearable=False,
-                    options=utils.get_matches_options(DF_COMP, DEFAULT_COMP, DEFAULT_YEAR),
+                    options= [{'label': MATCHES_ITN[match_id],'value' : match_id } 
+                              for match_id in SZN_TO_MATCHES[DEFAULT_SZN_ID]], 
                     value=DEFAULT_MATCH_ID,
                     persistence=True
                 )
@@ -131,7 +133,7 @@ card_summary = dbc.Card(
 )
 
 
-# Build App
+# ---------------  Build App -------------------------
 app = Dash(__name__,
            external_stylesheets=[dbc.themes.BOOTSTRAP],
            suppress_callback_exceptions=True,
@@ -139,10 +141,9 @@ app = Dash(__name__,
                {"name": "viewport", "content": "width=device-width, initial-scale=1"}
                          ]
            )
-# Read the click count data from the file
 server = app.server
-# app.css.config.serve_locally = True
-# app.scripts.config.serve_locally = True
+app.css.config.serve_locally = True
+app.scripts.config.serve_locally = True
 app.layout = html.Div([
     html.Img(src='assets/imgs/background3.png',id='main-background-img'),
     dbc.Container([
@@ -170,7 +171,7 @@ app.layout = html.Div([
     ],fluid=False,id='container')
 ])
 
-
+# ---------------  Callbacks -------------------------
 # Generate music
 @app.callback(
     Output('store-timestr', 'data'),
@@ -223,37 +224,26 @@ def update_players_and_notes(players,n_clicks):
         html.Tbody([html.Tr([html.Td(player),html.Td(note,className='td-note')]) for player,note in dnotes.items()])])
     return layout ,dnotes
 
-
-# Define callback to update dropdown when values are changed
-# @app.callback(
-#     Output('dd-comp', 'options'),
-#     Output('dd-comp', 'value'),
-#     [Input("dd-gender", "value")],
-#     prevent_initial_call=True
-# )
-# def update_comp_options(gender):
-#     options = utils.get_comp_names(DF_COMP, gender)
-#     return options,options[0]
-
-# @app.callback(
-#     Output('dd-year', 'options'),
-#     Output('dd-year', 'value'),
-#     [Input("dd-comp", "value")],
-#     prevent_initial_call=True
-# )
-# def update_comp_options(gender,comp_name):
-#     options = utils.get_comp_years(DF_COMP, comp_name)
-#     return options,options[0]
+@app.callback(
+    Output('dd-szn', 'options'),
+    Output('dd-szn', 'value'),
+    [Input("dd-comp", "value")],
+    prevent_initial_call=True
+)
+def update_szn_options(comp_id):
+    options = [{'value' : szn_id ,'label': SZN_ITN[szn_id]} 
+                for szn_id in COMP_TO_SZNS[comp_id]]
+    return options,options[0]["value"]
 
 @app.callback(
     Output('dd-match', 'options'),
     Output('dd-match', 'value'),
-    [Input("dd-comp", "value"),
-     Input("dd-year", "value")],
+    [Input("dd-szn", "value")],
     prevent_initial_call=True
 )
-def update_matches_options(comp_name,year):
-    options = utils.get_matches_options(DF_COMP, comp_name, year)
+def update_matches_options(szn_id):
+    options = [{'value' : match_id ,'label': MATCHES_ITN[match_id]} 
+                for match_id in SZN_TO_MATCHES[szn_id]]
     return options,options[0]['value']
 
 @app.callback(
@@ -268,7 +258,7 @@ def store_events(match_id):
     players = list(df_events['player'].dropna().unique())
     return df_events.to_dict("records"),players
 
-
-# Press the green button in the gutter to run the script.
+# ---------------  __main__ -------------------------
 if __name__ == '__main__':
     app.run_server(debug=True,port=8000,dev_tools_hot_reload = False)
+    # app.run_server(debug=True,port=8000)
