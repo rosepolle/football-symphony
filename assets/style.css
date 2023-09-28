@@ -41,7 +41,7 @@
 body {
     font-family: '395-Eq', sans-serif;
 }
-#div-dd-year{
+#div-dd-szn{
     font-family: 'gameplay';
     /*font-weight: bold;*/
     font-size:12px;
@@ -156,7 +156,7 @@ table th {
 #div-dd-comp{
     flex: 2 1 0;
 }
-#div-dd-year{
+#div-dd-szn{
     flex: 1 1 0;
 }
 #div-dd-match{
