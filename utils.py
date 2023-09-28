@@ -189,33 +189,3 @@ def sample_notes(players,music21 = True):
     return dnotes
 
 
-# Dropdown updates
-# def get_comp_names(df,gender):
-#     return list(df[df['competition_gender']==gender]['competition_name'].unique())
-
-def get_comp_years(df,comp_name):
-    return list(df[df['competition_name'] == comp_name]['season_name'])
-
-
-def get_matches(df,comp_name,year):
-    comp_id, szn_id = get_comp_and_szn_id(df,comp_name,year)
-    df_matches = sb.matches(competition_id=comp_id, season_id=szn_id)
-    df_matches['match_name'] = df_matches['home_team'] + '-' + df_matches['away_team']
-    return df_matches
-
-def get_matches_options(df_comp,comp_name,year):
-    df_matches = get_matches(df_comp,comp_name,year)
-    options = df_matches[['match_name','match_id']]\
-        .rename(columns={'match_name':'label','match_id':'value'})\
-        .to_dict(orient='records')
-    return options
-
-def get_comp_and_szn_id(df,comp_name,year):
-    dftmp = df[(df['competition_name'] == comp_name)
-               & (df['season_name'] == year)]
-    if len(dftmp)>0:
-        comp_id = dftmp['competition_id'].iloc[0]
-        szn_id = dftmp['season_id'].iloc[0]
-        return comp_id,szn_id
-    else:
-        return DEFAULT_COMP_ID,DEFAULT_SZN_ID
