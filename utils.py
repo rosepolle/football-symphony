@@ -133,20 +133,20 @@ def generate_music21(df_events,dnotes,main_instrument,drum_instrument,timestr,so
     s, summary = make_stream(df_events, dnotes,main_instrument,drum_instrument)
     dt = time.time()-start_time
     print(f'Making stream took {dt}')
-    logging.info(f'Making stream took {dt}')
+    logging.INFO(f'Making stream took {dt}')
 
     start_time = time.time()
     fp = s.write('midi', fp='assets/tmp.mid')
     dt = time.time()-start_time
     print(f'writing to midi took {dt}')
-    logging.info(f'writing to midi took {dt}')
+    logging.INFO(f'writing to midi took {dt}')
 
     start_time = time.time()
     fs = FluidSynth(soundfont)
     fs.midi_to_audio('assets/tmp.mid', 'assets/tmp-wav-%s.wav'%timestr)
     dt = time.time()-start_time
     print(f'Converting to audio took {dt}')
-    logging.info(f'Converting to audio took {dt}')
+    logging.INFO(f'Converting to audio took {dt}')
 
     return summary
 
