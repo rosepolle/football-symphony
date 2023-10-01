@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import random
 from music21 import *
-from music21 import stream, instrument, tempo
+from music21 import stream, instrument, tempo, midi
 from music21.note import Note,Rest
 from midi2audio import FluidSynth
 from dash import html
@@ -133,20 +133,22 @@ def generate_music21(df_events,dnotes,main_instrument,drum_instrument,timestr,so
     s, summary = make_stream(df_events, dnotes,main_instrument,drum_instrument)
     dt = time.time()-start_time
     print(f'Making stream took {dt}')
-    logging.INFO(f'Making stream took {dt}')
+    logging.warning(f'Making stream took {dt}')
 
     start_time = time.time()
-    fp = s.write('midi', fp='assets/tmp.mid')
+    # fp = s.write('midi', fp='assets/tmp.mid')
+    mf = midi.translate.streamToMidiFile(s)
+    print(mf)
     dt = time.time()-start_time
     print(f'writing to midi took {dt}')
-    logging.INFO(f'writing to midi took {dt}')
+    logging.warning(f'writing to midi took {dt}')
 
     start_time = time.time()
     fs = FluidSynth(soundfont)
     fs.midi_to_audio('assets/tmp.mid', 'assets/tmp-wav-%s.wav'%timestr)
     dt = time.time()-start_time
     print(f'Converting to audio took {dt}')
-    logging.INFO(f'Converting to audio took {dt}')
+    logging.warning(f'Converting to audio took {dt}')
 
     return summary
 

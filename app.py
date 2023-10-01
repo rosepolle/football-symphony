@@ -181,7 +181,7 @@ def generate_music(n_clicks,events,dnotes,main_instrument,drum_instrument):
                                          timestr,
                                          soundfont= 'assets/soundfont/GeneralUser.sf2')
         dt = time.time()-start_time
-        logging.INFO(f'generating music took {dt}')
+        logging.warning(f'generating music took {dt}')
         print(f'generating music took {dt}')
 
         return timestr, 'Music generated!',utils.make_summary(summary)
@@ -245,7 +245,7 @@ def store_events(match_id):
     df_events = pd.read_parquet(PATH_EVENTS+f'events_match{match_id}.parquet')
     # df_events = sb.events(match_id=match_id)
     dt = time.time()-start_time
-    logging.INFO(f'fetching events took {dt}')
+    logging.warning(f'fetching events took {dt}')
     print(f'fetching events took {dt}')
     players = list(df_events['player'].dropna().unique())
     return df_events.to_dict("records"),players
