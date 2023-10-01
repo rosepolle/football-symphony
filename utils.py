@@ -136,9 +136,9 @@ def generate_music21(df_events,dnotes,main_instrument,drum_instrument,timestr,so
     logging.warning(f'Making stream took {dt}')
 
     start_time = time.time()
-    # fp = s.write('midi', fp='assets/tmp.mid')
-    mf = midi.translate.streamToMidiFile(s)
-    print(mf)
+    fp = s.write('midi', fp='assets/tmp.mid')
+    # mf = midi.translate.streamToMidiFile(s)
+    # print(mf)
     dt = time.time()-start_time
     print(f'writing to midi took {dt}')
     logging.warning(f'writing to midi took {dt}')
