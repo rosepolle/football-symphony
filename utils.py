@@ -1,5 +1,5 @@
 
-from statsbombpy import sb
+# from statsbombpy import sb
 import pandas as pd
 import numpy as np
 import random
@@ -9,6 +9,10 @@ from music21.note import Note,Rest
 from midi2audio import FluidSynth
 from dash import html
 import datetime
+import time
+import logging
+
+from common import NAME_TO_NICKNAME
 
 
 COLUMNS_EVENTS = [
@@ -125,10 +129,25 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
 
 # Play music 21 stream
 def generate_music21(df_events,dnotes,main_instrument,drum_instrument,timestr,soundfont):
+    start_time = time.time()
     s, summary = make_stream(df_events, dnotes,main_instrument,drum_instrument)
+    dt = time.time()-start_time
+    print(f'Making stream took {dt}')
+    logging.info(f'Making stream took {dt}')
+
+    start_time = time.time()
     fp = s.write('midi', fp='assets/tmp.mid')
+    dt = time.time()-start_time
+    print(f'writing to midi took {dt}')
+    logging.info(f'writing to midi took {dt}')
+
+    start_time = time.time()
     fs = FluidSynth(soundfont)
     fs.midi_to_audio('assets/tmp.mid', 'assets/tmp-wav-%s.wav'%timestr)
+    dt = time.time()-start_time
+    print(f'Converting to audio took {dt}')
+    logging.info(f'Converting to audio took {dt}')
+
     return summary
 
 def get_player(timestr):
@@ -162,7 +181,7 @@ def make_summary(summary):
 
 def event_string(event_dict):
     t = round_seconds(datetime.timedelta(minutes=event_dict['time'] / TEMPO))
-    return event_dict['player'] + '-' + str(t)
+    return NAME_TO_NICKNAME[event_dict['player']] + '-' + str(t)
 
 # Define notes
 def sample_notes(players,music21 = True):
@@ -187,5 +206,7 @@ def sample_notes(players,music21 = True):
 
     dnotes = df_ptn[['player','note']].set_index('player').to_dict()['note']
     return dnotes
+
+
 
 

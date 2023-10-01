@@ -1,44 +1,26 @@
 from dash import Dash, html, dcc, ctx, ALL,no_update
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
-from statsbombpy import sb
+# from statsbombpy import sb
 import pandas as pd
 from datetime import datetime
 import os
 import glob
 import time
 import pickle
+import time
+import logging
 
 import utils
 
-
 # --------------- Global vars -------------------------
-# Instruments
-DRUM_INSTRUMENTS = ['Agogo', 'BassDrum', 'BongoDrums', 'Castanets', 'ChurchBells', 'CongaDrum', 'Cowbell', 'CrashCymbals', 'Cymbals', 'Dulcimer', 'FingerCymbals', 'Glockenspiel', 'Gong', 'Handbells', 'HiHatCymbal', 'Kalimba', 'Maracas', 'Marimba', 'PitchedPercussion', 'Ratchet', 'RideCymbals', 'SandpaperBlocks', 'Siren', 'SizzleCymbal', 'SleighBells', 'SnareDrum', 'SplashCymbals', 'SteelDrum', 'SuspendedCymbal', 'Taiko', 'TamTam', 'Tambourine', 'TempleBlock', 'TenorDrum', 'Timbales', 'Timpani', 'TomTom', 'Triangle', 'TubularBells', 'UnpitchedPercussion', 'Vibraphone', 'Vibraslap', 'Whip', 'WindMachine', 'Woodblock', 'Xylophone']
-MAIN_INSTRUMENTS = ['Accordion', 'AcousticBass', 'AcousticGuitar', 'Alto', 'AltoSaxophone', 'Bagpipes', 'Banjo', 'Baritone', 'BaritoneSaxophone', 'Bass', 'BassClarinet', 'BassTrombone', 'Bassoon', 'BrassInstrument', 'Celesta', 'Choir', 'Clarinet', 'Clavichord', 'Conductor', 'Contrabass', 'Contrabassoon', 'ElectricBass', 'ElectricGuitar', 'ElectricOrgan', 'ElectricPiano', 'EnglishHorn', 'Flute', 'FretlessBass', 'Guitar', 'Harmonica', 'Harp', 'Harpsichord', 'Horn', 'KeyboardInstrument', 'Koto', 'Lute', 'Mandolin', 'MezzoSoprano', 'Oboe', 'Ocarina', 'Organ', 'PanFlute', 'Percussion', 'Piano', 'Piccolo', 'PipeOrgan', 'Recorder', 'ReedOrgan', 'Sampler', 'Saxophone', 'Shakuhachi', 'Shamisen', 'Shehnai', 'Sitar', 'Soprano', 'SopranoSaxophone', 'StringInstrument', 'Tenor', 'TenorSaxophone', 'Trombone', 'Trumpet', 'Tuba', 'Ukulele', 'Viola', 'Violin', 'Violoncello', 'Vocalist', 'Whistle', 'WoodwindInstrument']
+PATH_EVENTS = 'assets/data/events/'
+from common import DEFAULT_MAIN,DEFAULT_COMP_ID,DEFAULT_MATCH_ID,DEFAULT_SZN_ID
+from common import DRUM_INSTRUMENTS,MAIN_INSTRUMENTS
+from common import COMPS,COMP_ITN,COMP_TO_SZNS,SZN_ITN,SZN_TO_MATCHES,MATCHES_ITN
+from common import NAME_TO_NICKNAME
 
-# Data from preprocessing
-COMPS = pd.read_parquet('assets/data/competitions.parquet',engine='pyarrow')
-with open('assets/data/comp_itn.pickle', 'rb') as handle:
-    COMP_ITN = pickle.load(handle)
-with open('assets/data/szn_itn.pickle', 'rb') as handle:
-    SZN_ITN = pickle.load(handle)
-with open('assets/data/comp_to_szns.pickle', 'rb') as handle:
-    COMP_TO_SZNS = pickle.load(handle)
-with open('assets/data/szn_to_matches.pickle', 'rb') as handle:
-    SZN_TO_MATCHES = pickle.load(handle)
-with open('assets/data/matches_itn.pickle', 'rb') as handle:
-    MATCHES_ITN = pickle.load(handle)
-
-# Default values
-DEFAULT_MAIN = "Choir"
-DEFAULT_COMP_ID = 53 #"UEFA Women's Euro"
-DEFAULT_SZN_ID = 106 #'2022'
-DEFAULT_MATCH_ID = 3835333 #France Women's-Argentina Women's
-
-
-
-# --------------- Conponents -------------------------
+# --------------- Components -------------------------
 card_dropdowns = dbc.Card(
     dbc.CardBody(
         [
@@ -191,9 +173,16 @@ def generate_music(n_clicks,events,dnotes,main_instrument,drum_instrument):
         for filename in glob.glob("assets/tmp-wav*"):
             os.remove(filename)
         timestr = datetime.now().strftime("%d%m%y_%H%M%S")
-        summary = utils.generate_music21(df_events,dnotes,main_instrument,drum_instrument,
-                               timestr,
-                               soundfont= 'assets/soundfont/GeneralUser.sf2')
+        start_time = time.time()
+        summary = utils.generate_music21(df_events,
+                                         dnotes,
+                                         main_instrument,
+                                         drum_instrument,
+                                         timestr,
+                                         soundfont= 'assets/soundfont/GeneralUser.sf2')
+        dt = time.time()-start_time
+        logging.info(f'generating music took {dt}')
+        print(f'generating music took {dt}')
 
         return timestr, 'Music generated!',utils.make_summary(summary)
 
@@ -221,7 +210,7 @@ def update_players_and_notes(players,n_clicks):
     dnotes = utils.sample_notes(players,music21=True)
     layout = html.Table([
         html.Thead([html.Tr([html.Th('Player'),html.Th('Note')])]),
-        html.Tbody([html.Tr([html.Td(player),html.Td(note,className='td-note')]) for player,note in dnotes.items()])])
+        html.Tbody([html.Tr([html.Td(NAME_TO_NICKNAME[player]),html.Td(note,className='td-note')]) for player,note in dnotes.items()])])
     return layout ,dnotes
 
 @app.callback(
@@ -252,9 +241,12 @@ def update_matches_options(szn_id):
     Input('dd-match', 'value'),
 )
 def store_events(match_id):
-    df_events = sb.events(match_id=match_id)
-    # lineups = sb.lineups(match_id=match_id)
-    # players = utils.player_nicknames(lineups)
+    start_time = time.time()
+    df_events = pd.read_parquet(PATH_EVENTS+f'events_match{match_id}.parquet')
+    # df_events = sb.events(match_id=match_id)
+    dt = time.time()-start_time
+    logging.info(f'fetching events took {dt}')
+    print(f'fetching events took {dt}')
     players = list(df_events['player'].dropna().unique())
     return df_events.to_dict("records"),players
 
