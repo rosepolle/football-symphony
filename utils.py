@@ -11,6 +11,10 @@ from dash import html
 import datetime
 import time
 import logging
+# import fluidsynth #pyfluidsynth not working (does not find fluidsynth: have arm64 need x86_64)
+
+# import mido
+# import sys
 
 from common import NAME_TO_NICKNAME
 
@@ -37,8 +41,8 @@ TEMPO = 120
 
 def make_goal(part,ctime):
     for i in range(4):
-        part.insert(ctime + GOAL_DURATION*i/8,Note(snare_drum_pitch, quarterLength=ctime + GOAL_DURATION/8))
-    part.insert(ctime + GOAL_DURATION/2,Note(crash_cymbal_pitch, quarterLength=ctime + GOAL_DURATION/2))
+        part.insert(ctime + GOAL_DURATION*i/8,Note(snare_drum_pitch, quarterLength=GOAL_DURATION/8))
+    part.insert(ctime + GOAL_DURATION/2,Note(crash_cymbal_pitch, quarterLength=GOAL_DURATION/2))
     return part
 
 def make_shot(part,ctime):
@@ -62,6 +66,7 @@ def sort_df_events_time(df_events):
         raise Warning("Not sorted by time")
     return df_events.sort_values(by=time_cols)
 
+
 # define stream
 def make_stream(df_events,dnotes,main_instrument,drum_instrument):
 
@@ -77,7 +82,7 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
     drum_instrument_class = eval('instrument.%s()' % drum_instrument)
     drumPart.insert(0, drum_instrument_class)
 
-    goalPart = stream.Part(id='drum')
+    goalPart = stream.Part(id='goal')
     drum_instrument_class = eval('instrument.%s()' % drum_instrument)
     goalPart.insert(0, drum_instrument_class)
 
@@ -90,7 +95,7 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
         fplayer = row['player']
         etype = row['type']
         eteam = row['team']
-        eduration = row['duration']/5
+        eduration = row['duration']/5 #divide all timings by 5
         if not (np.isnan(eduration) or eduration == 0):
             ctime += eduration
             # MAIN PART
@@ -111,44 +116,62 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
                 summary[eteam].append({'type':'Goal','time':ctime,'player':fplayer})
 
 
-
     s.insert(0, mainPart)
     s.insert(0, drumPart)
     s.insert(0, goalPart)
+
+    # set tempo
     mm = tempo.MetronomeMark(number=TEMPO)
-    # quarterDuration = mm.durationToSeconds(1.0)
-    # print(s.duration.quarterLength)
-    # print(s.duration.quarterLength/quarterDuration)
-    # print("Stream duration", ctime)
     s.append(mm)
-    # print('MAIN',mainPart.show('text'))
-    # print('DRUM',drumPart.show('text'))
-    # print('GOAL',goalPart.show('text'))
+
+    # mn,sec  = get_stream_duration(s,mm) # incl. gets quarter duration from mm
 
     return s,summary
 
 # Play music 21 stream
 def generate_music21(df_events,dnotes,main_instrument,drum_instrument,timestr,soundfont):
+
+    # 1 ------- MAKE STREAM --------------
     start_time = time.time()
     s, summary = make_stream(df_events, dnotes,main_instrument,drum_instrument)
     dt = time.time()-start_time
-    print(f'Making stream took {dt}')
+    # print(f'Making stream took {dt}')
     logging.warning(f'Making stream took {dt}')
 
+    fs = FluidSynth(sound_font=soundfont,sample_rate=22050)
     start_time = time.time()
-    fp = s.write('midi', fp='assets/tmp.mid')
-    # mf = midi.translate.streamToMidiFile(s)
-    # print(mf)
-    dt = time.time()-start_time
-    print(f'writing to midi took {dt}')
-    logging.warning(f'writing to midi took {dt}')
+    fs.midi_to_audio(s.write('midi'),'assets/tmp-wav-%s.wav'%timestr)
+    logging.warning(f'DIRECT midi to audio took {time.time()-start_time}')
 
-    start_time = time.time()
-    fs = FluidSynth(soundfont)
-    fs.midi_to_audio('assets/tmp.mid', 'assets/tmp-wav-%s.wav'%timestr)
-    dt = time.time()-start_time
-    print(f'Converting to audio took {dt}')
-    logging.warning(f'Converting to audio took {dt}')
+    # USING fluidsynth
+    # fs = fluidsynth.Synth()
+    # sfid = fs.sfload(soundfont)
+    # fs.start()
+    # fs.midifile_load(s.write('midi'))
+    # fluidsynth.audio_driver().set_encoding(None)  # Set encoding to None to avoid unnecessary conversions
+    # fs.audio_write('assets/tmp-wav-%s.wav'%timestr)
+    # fs.free()
+
+
+    # # 2 ------- STREAM TO MIDI --------------
+    # start_time = time.time()
+    # # fp = s.write('midi', fp='assets/tmp.mid')
+    # mf = midi.translate.streamToMidiFile(s)
+    # mf.open('assets/tmp.mid', 'wb')  # write binary
+    # mf.write()
+    # mf.close()
+    # dt = time.time()-start_time
+    # # print(f'writing to midi took {dt}')
+    # logging.warning(f'writing to midi took {dt}')
+    
+
+    # # 2 ------- MIDI TO WAV --------------
+    # start_time = time.time()
+    # fs = FluidSynth(soundfont)
+    # fs.midi_to_audio('assets/tmp.mid', 'assets/tmp-wav-%s.wav'%timestr)
+    # dt = time.time()-start_time
+    # # print(f'Converting to audio took {dt}')
+    # logging.warning(f'Converting to audio took {dt}')
 
     return summary
 
@@ -209,6 +232,34 @@ def sample_notes(players,music21 = True):
     dnotes = df_ptn[['player','note']].set_index('player').to_dict()['note']
     return dnotes
 
+    
+def seconds_to_mn_s(length_in_seconds):
+    mn = length_in_seconds // 60
+    s = int(length_in_seconds - mn*60)
+    return mn,s
 
 
 
+
+# ------------ DEBUGGING-----------------
+
+# def to_txt_file(s,file_path):
+#     # print music21 stream to text file
+#     with open(file_path, 'w') as file:
+#     # Redirect the output to the file
+#         original_stdout = sys.stdout
+#         sys.stdout = file
+#         s.show('text')
+#         sys.stdout = original_stdout
+
+# def get_midi_length(midi_file_path):
+#     mid = mido.MidiFile('assets/tmp.mid')
+#     mn,sec = seconds_to_mn_s(mid.length)
+#     return mn,sec
+
+
+def get_stream_duration(s,mm):
+    #s= stream object - mm = metronomeMark
+    quarterDuration = mm.durationToSeconds(1.0)
+    duration_in_seconds = float(s.duration.quarterLength)*quarterDuration
+    return seconds_to_mn_s(duration_in_seconds)

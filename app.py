@@ -15,10 +15,12 @@ import utils
 
 # --------------- Global vars -------------------------
 PATH_EVENTS = 'assets/data/events/'
+SOUNDFONT = 'assets/soundfont/GeneralUser.sf2'
 from common import DEFAULT_MAIN,DEFAULT_COMP_ID,DEFAULT_MATCH_ID,DEFAULT_SZN_ID
 from common import DRUM_INSTRUMENTS,MAIN_INSTRUMENTS
 from common import COMPS,COMP_ITN,COMP_TO_SZNS,SZN_ITN,SZN_TO_MATCHES,MATCHES_ITN
 from common import NAME_TO_NICKNAME
+
 
 # --------------- Components -------------------------
 card_dropdowns = dbc.Card(
@@ -179,7 +181,7 @@ def generate_music(n_clicks,events,dnotes,main_instrument,drum_instrument):
                                          main_instrument,
                                          drum_instrument,
                                          timestr,
-                                         soundfont= 'assets/soundfont/GeneralUser.sf2')
+                                         soundfont= SOUNDFONT)
         dt = time.time()-start_time
         logging.warning(f'generating music took {dt}')
         print(f'generating music took {dt}')
@@ -207,10 +209,12 @@ def load_music(n_clicks,timestr):
      ],
 )
 def update_players_and_notes(players,n_clicks):
+    start_time = time.time()
     dnotes = utils.sample_notes(players,music21=True)
     layout = html.Table([
         html.Thead([html.Tr([html.Th('Player'),html.Th('Note')])]),
         html.Tbody([html.Tr([html.Td(NAME_TO_NICKNAME[player]),html.Td(note,className='td-note')]) for player,note in dnotes.items()])])
+    logging.warning(f'Updating players took {time.time()-start_time}')
     return layout ,dnotes
 
 @app.callback(
@@ -246,9 +250,11 @@ def store_events(match_id):
     # df_events = sb.events(match_id=match_id)
     dt = time.time()-start_time
     logging.warning(f'fetching events took {dt}')
-    print(f'fetching events took {dt}')
+    # print(f'fetching events took {dt}')
     players = list(df_events['player'].dropna().unique())
-    return df_events.to_dict("records"),players
+    events = df_events.to_dict("records")
+    logging.warning(f'fetching events 2 took {time.time()-start_time}')
+    return events,players
 
 # ---------------  __main__ -------------------------
 if __name__ == '__main__':
