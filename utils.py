@@ -138,9 +138,9 @@ def generate_music21(df_events,dnotes,main_instrument,drum_instrument,timestr,so
     # print(f'Making stream took {dt}')
     logging.warning(f'Making stream took {dt}')
 
-    fs = FluidSynth(sound_font=soundfont,sample_rate=22050)
+    fs = FluidSynth(sound_font=soundfont,sample_rate=16000)
     start_time = time.time()
-    fs.midi_to_audio(s.write('midi'),'assets/tmp-wav-%s.wav'%timestr)
+    fs.midi_to_audio(s.write('midi'),f'assets/tmp-wav-{timestr}.wav')
     logging.warning(f'DIRECT midi to audio took {time.time()-start_time}')
 
     # USING fluidsynth

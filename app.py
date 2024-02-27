@@ -8,7 +8,6 @@ import os
 import glob
 import time
 import pickle
-import time
 import logging
 
 import utils
@@ -23,6 +22,23 @@ from common import NAME_TO_NICKNAME
 
 
 # --------------- Components -------------------------
+
+
+card_instructions = dbc.Card(
+    dbc.CardBody(
+        [
+            html.Div([
+                html.P(
+                    "Create a song using a game's data. Each player is a note, and each event (foul, goal) is a drum sound."
+                )
+            ], className='',id='p-instr'),
+        ]
+    ,id='card-instr-body')
+,id='card-instr')
+
+
+
+
 card_dropdowns = dbc.Card(
     dbc.CardBody(
         [
@@ -59,6 +75,8 @@ card_dropdowns = dbc.Card(
         ]
     ,id='card-dd-body')
 ,id='card-dd')
+
+
 
 card_players_to_notes = dbc.Card([
     dbc.CardImg(
@@ -137,6 +155,9 @@ app.layout = html.Div([
         dcc.Store(id='store-timestr'),
         dcc.Location(id='url', refresh=True),
         dbc.Row(dbc.Col(html.H1("Football Opera"),id='title-row',className='text-center')),
+        dbc.Row([
+            dbc.Col(card_instructions)
+            ]),
         dbc.Row([
             dbc.Col(card_dropdowns)
         ],id='row-dd'),
