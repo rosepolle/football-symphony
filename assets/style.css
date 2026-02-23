@@ -94,8 +94,10 @@ img {
 
 /*****************Players***************/
 #card-players {
-    height:1000px;
-    /*height: 100%;*/
+    min-height: 400px;
+    height: auto;
+    max-height: 1000px;
+    overflow-y: auto;
     width: 100%;
 }
 #card-players-body {
@@ -181,6 +183,12 @@ table th {
 @media screen and (max-width:990px) {
   #div-dd-szn { flex-basis: 30%; }
   #div-dd-comp { flex-basis: 70%; }
+}
+
+@media screen and (max-width:768px) {
+  #card-players {
+    max-height: 500px;
+  }
 }
 
 

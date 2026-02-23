@@ -1,7 +1,8 @@
-from dash import Dash, html, dcc, ctx, ALL,no_update
+from dash import Dash, html, dcc, ctx, ALL, no_update, callback
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
-# from statsbombpy import sb
+from dash.long_callback import DiskcacheLongCallbackManager
+import diskcache
 import pandas as pd
 from datetime import datetime
 import os
@@ -15,6 +16,8 @@ import utils
 # --------------- Global vars -------------------------
 PATH_EVENTS = 'assets/data/events/'
 SOUNDFONT = 'assets/soundfont/GeneralUser.sf2'
+cache = diskcache.Cache("./cache")
+long_callback_manager = DiskcacheLongCallbackManager(cache)
 from common import DEFAULT_MAIN,DEFAULT_COMP_ID,DEFAULT_MATCH_ID,DEFAULT_SZN_ID
 from common import DRUM_INSTRUMENTS,MAIN_INSTRUMENTS
 from common import COMPS,COMP_ITN,COMP_TO_SZNS,SZN_ITN,SZN_TO_MATCHES,MATCHES_ITN
@@ -139,6 +142,7 @@ card_summary = dbc.Card(
 app = Dash(__name__,
            external_stylesheets=[dbc.themes.BOOTSTRAP],
            suppress_callback_exceptions=True,
+           long_callback_manager=long_callback_manager,
            meta_tags = [
                {"name": "viewport", "content": "width=device-width, initial-scale=1"}
                          ]
@@ -178,7 +182,7 @@ app.layout = html.Div([
 
 # ---------------  Callbacks -------------------------
 # Generate music
-@app.callback(
+@app.long_callback(
     Output('store-timestr', 'data'),
     Output('song-loading-output', 'children'),
     Output('div-match-summary', 'children'),
@@ -187,11 +191,18 @@ app.layout = html.Div([
     State("store-notes","data"),
     State("dd-main-instrument","value"),
     State("dd-drum-instrument","value"),
+    running=[
+        (Output("btn-generate", "disabled"), True, False),
+        (Output("song-loading-output", "children"), "Generating music...", ""),
+    ],
     prevent_initial_call=True
 )
-def generate_music(n_clicks,events,dnotes,main_instrument,drum_instrument):
+def generate_music(n_clicks,match_id,dnotes,main_instrument,drum_instrument):
     if n_clicks>0:
-        df_events = pd.DataFrame(events)
+        df_events = pd.read_parquet(
+            PATH_EVENTS + f'events_match{match_id}.parquet',
+            columns=['minute','second','team','player','type','duration','shot_outcome']
+        )
         # delete previous file in assets
         for filename in glob.glob("assets/tmp-wav*"):
             os.remove(filename)
@@ -267,15 +278,12 @@ def update_matches_options(szn_id):
 )
 def store_events(match_id):
     start_time = time.time()
-    df_events = pd.read_parquet(PATH_EVENTS+f'events_match{match_id}.parquet')
-    # df_events = sb.events(match_id=match_id)
-    dt = time.time()-start_time
-    logging.warning(f'fetching events took {dt}')
-    # print(f'fetching events took {dt}')
-    players = list(df_events['player'].dropna().unique())
-    events = df_events.to_dict("records")
-    logging.warning(f'fetching events 2 took {time.time()-start_time}')
-    return events,players
+    players = list(
+        pd.read_parquet(PATH_EVENTS + f'events_match{match_id}.parquet', columns=['player'])
+        ['player'].dropna().unique()
+    )
+    logging.warning(f'fetching players took {time.time()-start_time}')
+    return match_id, players
 
 # ---------------  __main__ -------------------------
 if __name__ == '__main__':

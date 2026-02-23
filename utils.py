@@ -6,17 +6,23 @@ import random
 from music21 import *
 from music21 import stream, instrument, tempo, midi
 from music21.note import Note,Rest
-from midi2audio import FluidSynth
+import subprocess
 from dash import html
 import datetime
 import time
 import logging
-# import fluidsynth #pyfluidsynth not working (does not find fluidsynth: have arm64 need x86_64)
-
-# import mido
-# import sys
 
 from common import NAME_TO_NICKNAME
+
+
+def _midi_to_audio(midi_file, audio_file, soundfont, sample_rate=16000):
+    """Convert MIDI to audio using FluidSynth CLI (compatible with FluidSynth 2.x)."""
+    subprocess.check_call([
+        'fluidsynth', '-ni',
+        '-F', audio_file,
+        '-r', str(sample_rate),
+        soundfont, midi_file
+    ])
 
 
 COLUMNS_EVENTS = [
@@ -79,15 +85,15 @@ def make_stream(df_events,dnotes,main_instrument,drum_instrument):
         summary[team]=[]
 
     drumPart = stream.Part(id='drum')
-    drum_instrument_class = eval('instrument.%s()' % drum_instrument)
+    drum_instrument_class = getattr(instrument, drum_instrument)()
     drumPart.insert(0, drum_instrument_class)
 
     goalPart = stream.Part(id='goal')
-    drum_instrument_class = eval('instrument.%s()' % drum_instrument)
-    goalPart.insert(0, drum_instrument_class)
+    goal_instrument_class = getattr(instrument, drum_instrument)()
+    goalPart.insert(0, goal_instrument_class)
 
     mainPart = stream.Part(id='main')
-    main_instrument_class = eval('instrument.%s()'% main_instrument)
+    main_instrument_class = getattr(instrument, main_instrument)()
     mainPart.insert(0, main_instrument_class)
 
     ctime = 0 # current time
@@ -138,9 +144,8 @@ def generate_music21(df_events,dnotes,main_instrument,drum_instrument,timestr,so
     # print(f'Making stream took {dt}')
     logging.warning(f'Making stream took {dt}')
 
-    fs = FluidSynth(sound_font=soundfont,sample_rate=16000)
     start_time = time.time()
-    fs.midi_to_audio(s.write('midi'),f'assets/tmp-wav-{timestr}.wav')
+    _midi_to_audio(s.write('midi'), f'assets/tmp-wav-{timestr}.wav', soundfont)
     logging.warning(f'DIRECT midi to audio took {time.time()-start_time}')
 
     # USING fluidsynth
