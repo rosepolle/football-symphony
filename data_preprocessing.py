@@ -11,7 +11,9 @@ from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
 
-DATA_VERSION = '1.1.0'
+DATA_VERSION = '1.1.0'  # no longer used to filter; kept for reference
+# Columns app.py reads from each events parquet — guaranteed present on save.
+EVENT_COLS = ['minute','second','team','player','type','duration','shot_outcome']
 KEEP_COMP = [16, #Champion's league
              43, #FIFA world cup
              2,  # Premier League
@@ -77,7 +79,10 @@ if save_matches:
                 i +=1 
             except:
                 print(f'Failed: comp={comp_id},szn={szn_id}')
-    df_all_matches = df_all_matches[df_all_matches['data_version']==DATA_VERSION].copy()  # Filter only good data version
+    # Keep all data versions. 1.0.2 / 1.0.3 / 1.1.0 are all compatible with the
+    # columns the app reads (see EVENT_COLS guard below). Restricting to 1.1.0
+    # previously silently dropped whole seasons (World Cup 2018, older CL finals, etc.).
+    df_all_matches = df_all_matches.copy()
     df_all_matches['match_name'] = df_all_matches['home_team'] + '-' + df_all_matches['away_team']
     df_all_matches.to_parquet('assets/data/all_matches.parquet')
 else:
@@ -111,6 +116,11 @@ if save_events:
     print("***Saving all events...***")
     for match_id in tqdm(all_match_ids):
         df_events = sb.events(match_id=match_id)
+        # Guarantee every column the app reads exists, so older data versions
+        # (which may omit e.g. shot_outcome) can never KeyError at read time.
+        for col in EVENT_COLS:
+            if col not in df_events.columns:
+                df_events[col] = pd.NA
         df_events.to_parquet(f'assets/data/events/events_match{match_id}.parquet')
 
         lineups = sb.lineups(match_id=match_id)
