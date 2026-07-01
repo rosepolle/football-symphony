@@ -133,14 +133,6 @@ table th {
 #song-loading{
     display: inline-block;
 }
-#btn-generate{
-    display: inline-block;
-}
-#btn-load{
-    margin-top: 5px;
-    margin-bottom: 5px;
-    display: block;
-}
 
 #div-match-summary{
     padding : 0px;
@@ -212,11 +204,12 @@ table th {
     flex-wrap: wrap;
 }
 #btn-generate{
+    display: inline-block;
     flex-shrink: 0;
+    margin-right: 12px;
 }
 #div-play{
     flex: 1 1 250px;
-    padding-left: 12px;
 }
 #player{
     width: 100%;
