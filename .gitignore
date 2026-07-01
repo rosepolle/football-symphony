@@ -3,3 +3,6 @@
 *output.pkl
 *.pyc
 *.idea
+cache/
+.cache/
+assets/tmp-wav*.wav

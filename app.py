@@ -221,14 +221,17 @@ def generate_music(n_clicks,match_id,dnotes,main_instrument,drum_instrument):
         return timestr, 'Music generated!',utils.make_summary(summary)
 
 
-# Load music
+# Load music: auto-loads when generation finishes (store-timestr updates);
+# the "Load song" button still works as a manual re-load.
 @app.callback(
     Output('div-play', 'children'),
+    Input("store-timestr", "data"),
     Input("btn-load", "n_clicks"),
-    State("store-timestr", "data"),
     prevent_initial_call=True
 )
-def load_music(n_clicks,timestr):
+def load_music(timestr,n_clicks):
+    if not timestr:
+        return no_update
     return utils.get_player(timestr)
 
 
