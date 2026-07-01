@@ -125,7 +125,6 @@ card_play = dbc.Card(
         dbc.Button('Generate song', id='btn-generate', n_clicks=0),
         dcc.Loading(id="song-loading",className='loading-msg',style={'display': 'inline-block'},
                     children=[html.Div(id="song-loading-output")], type="default"),
-        dbc.Button('Load song', id='btn-load', n_clicks=0),
         html.Div(id='div-play'),
         html.Div(id='div-play-mb'),
     ])
@@ -221,15 +220,13 @@ def generate_music(n_clicks,match_id,dnotes,main_instrument,drum_instrument):
         return timestr, 'Music generated!',utils.make_summary(summary)
 
 
-# Load music: auto-loads when generation finishes (store-timestr updates);
-# the "Load song" button still works as a manual re-load.
+# Load music: auto-loads when generation finishes (store-timestr updates).
 @app.callback(
     Output('div-play', 'children'),
     Input("store-timestr", "data"),
-    Input("btn-load", "n_clicks"),
     prevent_initial_call=True
 )
-def load_music(timestr,n_clicks):
+def load_music(timestr):
     if not timestr:
         return no_update
     return utils.get_player(timestr)
