@@ -206,8 +206,17 @@ table th {
 }
 
 /*****************Music Player***************/
+#div-generate-row{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+#btn-generate{
+    flex-shrink: 0;
+}
 #div-play{
-    width: 100%;
+    flex: 1 1 250px;
+    padding-left: 12px;
 }
 #player{
     width: 100%;
