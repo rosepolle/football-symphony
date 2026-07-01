@@ -7,5 +7,5 @@ COPY requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 COPY . ./
 
-CMD gunicorn -b 0.0.0.0:80 app.app:server
+CMD gunicorn -b 0.0.0.0:${PORT:-80} app:server
 
