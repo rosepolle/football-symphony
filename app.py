@@ -126,8 +126,8 @@ card_play = dbc.Card(
             dbc.Button('Generate song', id='btn-generate', n_clicks=0),
             dcc.Loading(id="song-loading",className='loading-msg',style={'display': 'inline-block'},
                         children=[html.Div(id="song-loading-output")], type="default"),
-            html.Div(id='div-play'),
         ], id='div-generate-row'),
+        html.Div(id='div-play'),
         html.Div(id='div-play-mb'),
     ])
 )

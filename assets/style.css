@@ -209,7 +209,7 @@ table th {
     margin-right: 12px;
 }
 #div-play{
-    flex: 1 1 250px;
+    width: 100%;
 }
 #player{
     width: 100%;
